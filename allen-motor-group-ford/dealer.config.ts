@@ -17,16 +17,16 @@ export const dealer: DealerConfig = {
 
   metaTitle: "Allen Ford, Essex Ford & SMC Ford | Allen Motor Group",
   metaDescription:
-    "Allen Motor Group Ford — your new digital dealer. New and used Ford cars, vans and pickups with 72-hour delivery, 14-day Right to Return and Ford Privilege pricing across the South of England and Midlands.",
+    "Allen Motor Group Ford — your trusted digital dealer. New and used Ford cars, vans and pickups with 72-hour delivery, 14-day Right to Return and Ford Privilege pricing across the South of England and Midlands.",
 
   alert: {
-    text: "Your new digital dealer: buy online with 72-hour delivery and a 14-day Right to Return.",
+    text: "Your trusted digital dealer: buy online with 72-hour delivery and a 14-day Right to Return.",
     linkLabel: "Get offer",
     href: "#offers",
   },
 
   hero: {
-    headline: "Your new digital dealer.",
+    headline: "Your trusted digital dealer.",
     strapline:
       "Allen Ford, Essex Ford and SMC Ford — over thirty locations from Bath and Swindon through the Midlands and Berkshire to London, Kent and Essex. Buy online, unaccompanied test drives, and one of the country's largest Ford Privilege dealers.",
     image: "/assets/vehicles/mustang.jpg",
