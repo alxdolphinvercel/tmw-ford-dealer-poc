@@ -1,0 +1,132 @@
+.heading {
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .heading {
+    font-size: 2rem;
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin-bottom: 0;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  flex: none;
+  padding: 12px 4px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tabActive {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.box[hidden] {
+  display: none;
+}
+
+.box {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  padding: 28px 24px;
+  border: 1px solid #ddd;
+  border-top: 1px solid var(--rule);
+}
+
+@media (min-width: 768px) {
+  .box {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    padding: 36px 32px;
+  }
+}
+
+.colTitle {
+  margin-bottom: 12px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.spaced {
+  margin-top: 24px;
+}
+
+.address {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-style: normal;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.hours {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+  font-weight: 300;
+}
+
+.hours li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.hours li:last-child {
+  border-bottom: 0;
+}
+
+.time {
+  min-width: 100px;
+  text-align: right;
+  color: var(--muted);
+}
+
+.phone {
+  display: inline-block;
+  color: var(--accent);
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.areas {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--muted);
+}

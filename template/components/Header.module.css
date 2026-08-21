@@ -1,0 +1,397 @@
+/* The alert strip and header travel together as one fixed stack. */
+.stack {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+/* ----------------------------------------------------------- alert strip --- */
+
+.alert {
+  overflow: hidden;
+  max-height: 120px;
+  background: var(--navy);
+  color: #fff;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+.alert[data-collapsed="true"] {
+  max-height: 0;
+  opacity: 0;
+}
+
+.alertInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 11px 0;
+}
+
+.alertInner p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.alertInner a {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.alertInner button {
+  flex: none;
+  padding: 4px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.alertInner button:hover {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------- header --- */
+
+.header {
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.solid {
+  background: #fff;
+  box-shadow: 0 1px 0 var(--rule);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+}
+
+@media (min-width: 1280px) {
+  .bar {
+    height: 84px;
+  }
+}
+
+/* ----------------------------------------------------------- menu button --- */
+
+.menuButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.solid .menuButton {
+  color: var(--text);
+}
+
+.menuIcon {
+  position: relative;
+  width: 22px;
+  height: 14px;
+}
+
+.menuIcon span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.menuIcon span:nth-child(1) {
+  top: 0;
+}
+.menuIcon span:nth-child(2) {
+  top: 6px;
+}
+.menuIcon span:nth-child(3) {
+  top: 12px;
+}
+
+.menuIcon[data-open="true"] span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.menuIcon[data-open="true"] span:nth-child(2) {
+  opacity: 0;
+}
+.menuIcon[data-open="true"] span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.menuLabel {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .menuLabel {
+    display: inline;
+  }
+}
+
+/* ------------------------------------------------------------ core links --- */
+
+.coreLinks {
+  display: none;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+}
+
+.solid .coreLinks {
+  color: var(--text);
+}
+
+.coreLinks a:hover {
+  color: var(--accent);
+}
+
+.call a {
+  color: var(--accent);
+}
+
+.solid .call a {
+  color: var(--accent);
+}
+
+@media (min-width: 900px) {
+  .coreLinks {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 32px;
+  }
+}
+
+/* ----------------------------------------------------------------- logo --- */
+
+.branchLogo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+@media (min-width: 900px) {
+  .branchLogo {
+    margin-left: 0;
+  }
+}
+
+.branchText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+  text-align: right;
+  color: #fff;
+}
+
+.solid .branchText {
+  color: var(--text);
+}
+
+.branchText span:first-child {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.branchText span:last-child {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.oval {
+  display: block;
+  width: 62px;
+  height: 24px;
+}
+
+.oval :global(img) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  .oval {
+    width: 76px;
+    height: 30px;
+  }
+}
+
+/* -------------------------------------------------------------- overlay --- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: #fff;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+}
+
+.overlay[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.overlayInner {
+  padding: 96px 0 64px;
+}
+
+@media (min-width: 1280px) {
+  .overlayInner {
+    padding-top: 128px;
+  }
+}
+
+.mainLinks,
+.secondaryMenu {
+  margin: 0 0 40px;
+  padding: 0;
+  list-style: none;
+}
+
+.mainLinks li,
+.secondaryMenu li {
+  border-bottom: 1px solid var(--rule);
+}
+
+.mainLinks a,
+.mainLinks button,
+.secondaryMenu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 18px 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1.125rem;
+  font-weight: 300;
+  text-align: left;
+}
+
+.mainLinks a:hover,
+.mainLinks button:hover,
+.secondaryMenu a:hover {
+  color: var(--accent);
+}
+
+@media (min-width: 768px) {
+  .mainLinks a,
+  .mainLinks button,
+  .secondaryMenu a {
+    font-size: 1.375rem;
+  }
+}
+
+.chevron,
+.chevronBack {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+.chevronBack {
+  transform: rotate(135deg);
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  margin-bottom: 8px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.menuTitle {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.keyLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 320px;
+}
+
+.keyLinks .overlayPhone {
+  display: inline-block;
+  padding: 12px 0;
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .keyLinks {
+    flex-direction: row;
+    align-items: center;
+    max-width: none;
+  }
+
+  .keyLinks li:first-child,
+  .keyLinks li:nth-child(2) {
+    min-width: 200px;
+  }
+}

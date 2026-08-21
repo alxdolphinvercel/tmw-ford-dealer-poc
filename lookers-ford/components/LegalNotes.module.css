@@ -1,0 +1,25 @@
+.section {
+  background: var(--surface-alt2);
+}
+
+.inner {
+  padding: 48px 0;
+}
+
+@media (min-width: 768px) {
+  .inner {
+    padding: 64px 0;
+  }
+}
+
+.inner p {
+  max-width: 980px;
+  font-size: 0.75rem;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.inner p:last-child {
+  margin-bottom: 0;
+}

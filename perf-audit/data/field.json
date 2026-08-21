@@ -1,0 +1,61 @@
+{
+  "source": "CrUX Vis (cruxvis.withgoogle.com), Chrome UX Report",
+  "collected": "2026-08-21",
+  "dataAsOf": "2026-08-15",
+  "note": "Field data = 28-day rolling aggregate of real Chrome users. CrUX Vis falls back from page-level (identifier=url) to origin-level (identifier=origin) when a specific page has too few samples; the granularity actually used is recorded per dealer. Our POC sites have no CrUX data by definition — they have no real-user traffic yet — which is why the like-for-like comparison is the lab section.",
+  "thresholds": {
+    "LCP": "good <= 2.5s",
+    "INP": "good <= 200ms",
+    "CLS": "good <= 0.1"
+  },
+  "dealers": [
+    {
+      "dealer": "Lookers Ford",
+      "subject": "https://www.lookers.co.uk/ford",
+      "granularity": "page",
+      "loadingPerformance": "good but regressing",
+      "interactivity": "needs improvement but is regressing",
+      "visualStability": "good and stable",
+      "sourceLink": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fwww.lookers.co.uk%2Fford&identifier=url&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+    },
+    {
+      "dealer": "Evans Halshaw Ford",
+      "subject": "https://www.evanshalshaw.com",
+      "granularity": "origin",
+      "granularityNote": "No page-level CrUX data for /ford; CrUX Vis fell back to the origin.",
+      "loadingPerformance": "good and stable",
+      "interactivity": "good and stable",
+      "visualStability": "needs improvement but is regressing",
+      "sourceLink": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fwww.evanshalshaw.com%2Fford&identifier=origin&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+    },
+    {
+      "dealer": "Allen Motor Group Ford",
+      "subject": "https://www.allenmotorgroup.co.uk",
+      "granularity": "origin",
+      "granularityNote": "No page-level CrUX data for /ford; CrUX Vis fell back to the origin.",
+      "loadingPerformance": "good and stable",
+      "interactivity": "good and stable",
+      "visualStability": "good and improving",
+      "sourceLink": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fwww.allenmotorgroup.co.uk%2Fford&identifier=origin&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+    },
+    {
+      "dealer": "Group 1 Ford",
+      "subject": "https://www.group1auto.co.uk",
+      "granularity": "origin",
+      "granularityNote": "No page-level CrUX data for /ford; CrUX Vis fell back to the origin.",
+      "loadingPerformance": "good and stable",
+      "interactivity": "good and stable",
+      "visualStability": "poor and regressing",
+      "sourceLink": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fwww.group1auto.co.uk%2Fford&identifier=origin&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+    },
+    {
+      "dealer": "Hendy Ford",
+      "subject": "https://www.hendy.co.uk/ford/",
+      "granularity": "page",
+      "loadingPerformance": "good but regressing",
+      "interactivity": "good",
+      "visualStability": "good and stable",
+      "sourceLink": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fwww.hendy.co.uk%2Fford%2F&identifier=url&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+{
+  "generated": "2026-08-21T10:35:14.630Z",
+  "tool": "Lighthouse CLI (npx lighthouse)",
+  "runs": {
+    "mobile": 5,
+    "desktop": 3
+  },
+  "note": "All values are medians across runs. Times in ms, bytes in bytes.",
+  "results": [
+    {
+      "dealer": "Lookers Ford",
+      "incumbent": {
+        "url": "https://www.lookers.co.uk/ford",
+        "mobile": {
+          "samples": 5,
+          "score": 51,
+          "lcp": 25151.213500000005,
+          "fcp": 9654.277000000002,
+          "tbt": 262,
+          "cls": 0,
+          "si": 9654.277000000002,
+          "ttfb": 76,
+          "bytes": 3760450,
+          "requests": 94
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 81,
+          "lcp": 2688.8370000000004,
+          "fcp": 1269.115,
+          "tbt": 0,
+          "cls": 0.030724463077882846,
+          "si": 1515.1228583161824,
+          "ttfb": 60,
+          "bytes": 4340909,
+          "requests": 93
+        }
+      },
+      "poc": {
+        "url": "https://lookers-ford-poc.vercel.app",
+        "mobile": {
+          "samples": 5,
+          "score": 99,
+          "lcp": 2095.806,
+          "fcp": 912.376,
+          "tbt": 4.5,
+          "cls": 0,
+          "si": 912.376,
+          "ttfb": 12,
+          "bytes": 450068,
+          "requests": 21
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 100,
+          "lcp": 602.3969999999999,
+          "fcp": 249.392,
+          "tbt": 0,
+          "cls": 0,
+          "si": 297.8484945877408,
+          "ttfb": 12,
+          "bytes": 593810,
+          "requests": 22
+        }
+      }
+    },
+    {
+      "dealer": "Evans Halshaw Ford",
+      "incumbent": {
+        "url": "https://www.evanshalshaw.com/ford",
+        "mobile": {
+          "samples": 5,
+          "score": 64,
+          "lcp": 3263.485,
+          "fcp": 2198.679,
+          "tbt": 257.5,
+          "cls": 0.39818516112679503,
+          "si": 4645.400312764117,
+          "ttfb": 144,
+          "bytes": 3791262,
+          "requests": 99
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 98,
+          "lcp": 777.2600000000001,
+          "fcp": 571.047,
+          "tbt": 0,
+          "cls": 0.03178987242068704,
+          "si": 1187.7322935334673,
+          "ttfb": 154,
+          "bytes": 3755208,
+          "requests": 108
+        }
+      },
+      "poc": {
+        "url": "https://evanshalshaw-ford-poc.vercel.app",
+        "mobile": {
+          "samples": 5,
+          "score": 99,
+          "lcp": 2263.125,
+          "fcp": 945.125,
+          "tbt": 4.5,
+          "cls": 0,
+          "si": 945.125,
+          "ttfb": 12,
+          "bytes": 430460,
+          "requests": 21
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 100,
+          "lcp": 528.5260000000001,
+          "fcp": 254.163,
+          "tbt": 0,
+          "cls": 0,
+          "si": 256.526,
+          "ttfb": 10,
+          "bytes": 555560,
+          "requests": 22
+        }
+      }
+    },
+    {
+      "dealer": "Allen Motor Group Ford",
+      "incumbent": {
+        "url": "https://www.allenmotorgroup.co.uk/ford",
+        "mobile": {
+          "samples": 5,
+          "score": 60,
+          "lcp": 5200.317,
+          "fcp": 2700.2039999999997,
+          "tbt": 428.99999999999636,
+          "cls": 0,
+          "si": 8079.078272167576,
+          "ttfb": 44,
+          "bytes": 3789636,
+          "requests": 367
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 91,
+          "lcp": 1194.1139999999998,
+          "fcp": 738.2465000000001,
+          "tbt": 0,
+          "cls": 0.000979489500335639,
+          "si": 2549.232448278647,
+          "ttfb": 46,
+          "bytes": 4000201,
+          "requests": 366
+        }
+      },
+      "poc": {
+        "url": "https://allen-motor-group-ford-poc.vercel.app",
+        "mobile": {
+          "samples": 5,
+          "score": 99,
+          "lcp": 2166.8705,
+          "fcp": 910.1115,
+          "tbt": 4,
+          "cls": 0,
+          "si": 910.1115,
+          "ttfb": 12,
+          "bytes": 450084,
+          "requests": 21
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 100,
+          "lcp": 525.823,
+          "fcp": 253.241,
+          "tbt": 0,
+          "cls": 0,
+          "si": 287.52503926139764,
+          "ttfb": 13,
+          "bytes": 573920,
+          "requests": 22
+        }
+      }
+    },
+    {
+      "dealer": "Group 1 Ford",
+      "incumbent": {
+        "url": "https://www.group1auto.co.uk/ford",
+        "mobile": {
+          "samples": 5,
+          "score": 45,
+          "lcp": 16416.4295,
+          "fcp": 9195.6705,
+          "tbt": 422.9999999999982,
+          "cls": 0,
+          "si": 9195.6705,
+          "ttfb": 84,
+          "bytes": 2744873,
+          "requests": 99
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 65,
+          "lcp": 2646.9040000000005,
+          "fcp": 848.6945000000001,
+          "tbt": 41.5,
+          "cls": 0.3912219265497767,
+          "si": 1320.8077514641998,
+          "ttfb": 77,
+          "bytes": 3283434,
+          "requests": 101
+        }
+      },
+      "poc": {
+        "url": "https://group1-ford-poc.vercel.app",
+        "mobile": {
+          "samples": 5,
+          "score": 99,
+          "lcp": 2098.295,
+          "fcp": 912.231,
+          "tbt": 3,
+          "cls": 0,
+          "si": 912.231,
+          "ttfb": 12,
+          "bytes": 449950,
+          "requests": 21
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 100,
+          "lcp": 526.605,
+          "fcp": 251.637,
+          "tbt": 0,
+          "cls": 0,
+          "si": 254.605,
+          "ttfb": 11,
+          "bytes": 558990,
+          "requests": 22
+        }
+      }
+    },
+    {
+      "dealer": "Hendy Ford",
+      "incumbent": {
+        "url": "https://www.hendy.co.uk/ford/",
+        "mobile": {
+          "samples": 5,
+          "score": 35,
+          "lcp": 4141.549,
+          "fcp": 2827.381,
+          "tbt": 830.5,
+          "cls": 0.4545655320356571,
+          "si": 7793.604695769713,
+          "ttfb": 1651,
+          "bytes": 2614273,
+          "requests": 126
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 53,
+          "lcp": 2309.1955000000007,
+          "fcp": 1519.3660000000002,
+          "tbt": 29,
+          "cls": 0.863640267635642,
+          "si": 2858.300534557604,
+          "ttfb": 1180,
+          "bytes": 4024366,
+          "requests": 139
+        }
+      },
+      "poc": {
+        "url": "https://hendy-ford-poc.vercel.app",
+        "mobile": {
+          "samples": 5,
+          "score": 99,
+          "lcp": 2070.751,
+          "fcp": 913.6135,
+          "tbt": 4,
+          "cls": 0,
+          "si": 913.6135,
+          "ttfb": 11,
+          "bytes": 449946,
+          "requests": 21
+        },
+        "desktop": {
+          "samples": 3,
+          "score": 100,
+          "lcp": 564.554,
+          "fcp": 253.4,
+          "tbt": 0,
+          "cls": 0,
+          "si": 253.773,
+          "ttfb": 11,
+          "bytes": 560135,
+          "requests": 22
+        }
+      }
+    }
+  ]
+}

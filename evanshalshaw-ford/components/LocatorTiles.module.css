@@ -1,0 +1,73 @@
+.section {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .section {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.tile {
+  position: relative;
+  display: block;
+  /* A 4:3 crop on narrow screens keeps the tile tall enough for the label
+     without a min-height, which would fight the ratio and force the grid
+     item wider than the viewport. */
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .tile {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+.tint {
+  position: absolute;
+  inset: 0;
+  /* Studio vehicle shots can be very light, so the bottom third needs a firm
+     wash to keep the white label and arrow link legible. */
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.62) 28%,
+    rgba(0, 0, 0, 0.22) 62%,
+    rgba(0, 0, 0, 0.12) 100%
+  );
+  transition: opacity 0.2s;
+}
+
+.tile:hover .tint {
+  opacity: 0.85;
+}
+
+.body {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 28px var(--gutter);
+  color: #fff;
+}
+
+@media (min-width: 1280px) {
+  .body {
+    padding: 36px 8%;
+  }
+}
+
+.title {
+  font-size: 1.125rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 1.5rem;
+  }
+}

@@ -1,0 +1,104 @@
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------------------------------------------------------- quote panel --- */
+
+.quotePanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+  padding: 40px 32px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .quotePanel {
+    min-height: 488px;
+    padding: 8% 6%;
+  }
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.quoteName {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.quoteRole {
+  margin: 4px 0 20px;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: var(--muted);
+}
+
+.quoteText {
+  max-width: 422px;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.quoteText::before {
+  content: "\201C";
+  display: block;
+  margin-bottom: -8px;
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.32;
+}
+
+/* ---------------------------------------------------------- promo panel --- */
+
+.promoPanel {
+  color: #fff;
+}
+
+.promoHeading {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 768px) {
+  .promoHeading {
+    font-size: 1.5rem;
+  }
+}
+
+.promoBody {
+  max-width: 420px;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}

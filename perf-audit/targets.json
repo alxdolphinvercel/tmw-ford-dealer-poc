@@ -1,0 +1,34 @@
+{
+  "comment": "Audit targets. 'poc' URLs are filled in once the sites are deployed; until then the runner simply skips any entry with a null url.",
+  "runs": {
+    "mobile": 5,
+    "desktop": 3
+  },
+  "pairs": [
+    {
+      "dealer": "Lookers Ford",
+      "incumbent": "https://www.lookers.co.uk/ford",
+      "poc": "https://lookers-ford-poc.vercel.app"
+    },
+    {
+      "dealer": "Evans Halshaw Ford",
+      "incumbent": "https://www.evanshalshaw.com/ford",
+      "poc": "https://evanshalshaw-ford-poc.vercel.app"
+    },
+    {
+      "dealer": "Allen Motor Group Ford",
+      "incumbent": "https://www.allenmotorgroup.co.uk/ford",
+      "poc": "https://allen-motor-group-ford-poc.vercel.app"
+    },
+    {
+      "dealer": "Group 1 Ford",
+      "incumbent": "https://www.group1auto.co.uk/ford",
+      "poc": "https://group1-ford-poc.vercel.app"
+    },
+    {
+      "dealer": "Hendy Ford",
+      "incumbent": "https://www.hendy.co.uk/ford/",
+      "poc": "https://hendy-ford-poc.vercel.app"
+    }
+  ]
+}

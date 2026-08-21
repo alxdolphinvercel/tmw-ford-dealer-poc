@@ -1,0 +1,52 @@
+import type { Metadata } from "next";
+import { DM_Sans, Archivo_Narrow } from "next/font/google";
+import { dealer } from "@/dealer.config";
+import "./globals.css";
+
+/* Ford Antenna is proprietary; DM Sans + Archivo Narrow are the closest
+   freely-licensed substitutes for Antenna and Antenna Condensed. */
+const body = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const display = Archivo_Narrow({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: dealer.metaTitle,
+  description: dealer.metaDescription,
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { brand } = dealer;
+  return (
+    <html lang="en-GB">
+      <body
+        className={`${body.variable} ${display.variable}`}
+        style={
+          {
+            "--accent": brand.accent,
+            "--accent-dark": brand.accentDark,
+            "--navy": brand.navy,
+          } as React.CSSProperties
+        }
+      >
+        <a className="skipLink" href="#main-content">
+          Skip to main content
+        </a>
+        {children}
+      </body>
+    </html>
+  );
+}

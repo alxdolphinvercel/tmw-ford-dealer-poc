@@ -1,0 +1,322 @@
+/* ==========================================================================
+   Ford Dealer Template — design system
+   Structure and metrics ported from the BMW Group 1 benchmark, re-skinned to
+   Ford. Dealer accent/navy arrive as CSS custom properties from dealer.config,
+   so this file is identical across all ~190 sites.
+   ========================================================================== */
+
+:root {
+  /* Ford national (Fixed) */
+  --ford-blue: #00095b;
+  --ford-skyview: #066fef;
+  --ford-ink: #00142e;
+
+  /* Dealer (Flexible) — overridden per site on <body> */
+  --accent: #066fef;
+  --accent-dark: #00095b;
+  --navy: #00142e;
+
+  /* Neutrals */
+  --text: #262626;
+  --muted: #666;
+  --rule: #e6e6e6;
+  --surface: #fff;
+  --surface-alt: #f5f5f5;
+  --surface-alt2: #f9f9f9;
+
+  /* Metrics */
+  --max-width: 1440px;
+  --gutter: 5%;
+  --gutter-lg: 10%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--text);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin: 0;
+  font-weight: 300;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Display face — stands in for Ford Antenna Condensed */
+.display {
+  font-family: var(--font-display), "Arial Narrow", Arial, sans-serif;
+  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* --------------------------------------------------------------- layout --- */
+
+.widthHolder {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.contentHolder {
+  margin: 0 var(--gutter);
+}
+
+@media (min-width: 1280px) {
+  .contentHolder {
+    margin: 0 var(--gutter-lg);
+  }
+}
+
+.altBg {
+  background: var(--surface-alt);
+}
+
+.sectionSpace {
+  padding: 56px 0 64px;
+}
+
+@media (min-width: 768px) {
+  .sectionSpace {
+    padding: 80px 0 88px;
+  }
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .sectionTitle {
+    font-size: 2.25rem;
+    margin-bottom: 44px;
+  }
+}
+
+.skipLink {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  background: #fff;
+  color: var(--text);
+  padding: 12px 20px;
+  font-size: 0.8125rem;
+}
+
+.skipLink:focus {
+  left: 0;
+}
+
+/* -------------------------------------------------------------- buttons --- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 24px;
+  border-radius: 0; /* square corners are the benchmark's signature */
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btnPrimary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btnPrimary:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+.btnSecondary {
+  background: #fff;
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.btnSecondary:hover {
+  background: var(--surface-alt);
+}
+
+@media (max-width: 767px) {
+  .btn {
+    width: 100%;
+  }
+}
+
+/* The dominant CTA pattern on the benchmark: text + trailing arrow */
+.arrowLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 15px 0;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.arrowLink::after {
+  content: "";
+  width: 18px;
+  height: 8px;
+  background: currentColor;
+  /* chevron-right, drawn as a mask so it inherits colour */
+  -webkit-mask: var(--arrow) no-repeat center / contain;
+  mask: var(--arrow) no-repeat center / contain;
+  transition: transform 0.15s;
+}
+
+.arrowLink:hover::after {
+  transform: translateX(4px);
+}
+
+.arrowLink:hover {
+  color: var(--accent-dark);
+}
+
+.whiteArrow {
+  color: #fff;
+}
+
+.whiteArrow:hover {
+  color: #fff;
+  opacity: 0.7;
+}
+
+:root {
+  --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 8'%3E%3Cpath d='M13.6 0 12.5 1.1l2.2 2.2H0v1.4h14.7l-2.2 2.2L13.6 8 17.9 4z'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------- cards --- */
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 420px;
+  padding: 32px 28px;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .panel {
+    min-height: 488px;
+    padding: 40px 36px;
+  }
+}
+
+.panelImage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.panelImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.panelTint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.panelBody {
+  position: relative;
+  z-index: 2;
+}
+
+.eyebrow {
+  display: inline-block;
+  padding: 4px 8px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------ utilities --- */
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Scroll reveal — CSS-only equivalent of the benchmark's GSAP panels.
+   Deliberately animates transform only, never opacity: a scroll-driven fade
+   leaves content invisible to screenshots, print and crawlers, and to any
+   viewport where the view() range never resolves. The rise is the polish;
+   legibility is not conditional on it. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    animation: revealUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+
+@keyframes revealUp {
+  from {
+    transform: translateY(26px);
+  }
+  to {
+    transform: none;
+  }
+}

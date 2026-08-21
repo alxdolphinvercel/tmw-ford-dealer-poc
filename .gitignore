@@ -1,0 +1,9 @@
+node_modules
+.next
+.vercel
+.DS_Store
+
+# Raw Lighthouse reports — 80 files / ~67MB. The derived summaries in
+# perf-audit/data/*.json are what the report cites and are committed.
+perf-audit/data/raw/
+perf-audit/data/spotcheck/
