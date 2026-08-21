@@ -79,7 +79,7 @@ export const FORD_CAMPAIGNS = {
   powerPromise: {
     heading: "FORD POWER PROMISE.",
     body: [
-      "Buy any new all-electric Ford and we'll give you a home charger with free standard installation, plus up to 10,000 miles of free charging credit on Intelligent Octopus Go.",
+      "Buy any new all-electric Ford before 31 December 2026 and we'll give you a home charger with free standard installation, plus up to 10,000 miles of free charging credit on Intelligent Octopus Go.",
       "Add Ford Dynamic Charging and you could save up to 70% on your home energy costs, with roadside assistance included as standard.",
     ],
     link: "Discover Ford Power Promise",
