@@ -62,10 +62,10 @@ export const dealer: DealerConfig = {
         "Our customers are at the heart of everything we do — which in practice means a personalised video inspection with every service, an honest recommendation on what can wait, and an account manager who picks up the phone if you run a fleet.",
     },
     promo: {
-      eyebrow: "Promotion",
-      heading: "Win a Ford Puma",
+      eyebrow: "Offer",
+      heading: "Save £1,500 on a Ford Capri",
       body:
-        "Book and complete a test drive before the end of the month and you'll be entered into our prize draw to win a Ford Puma.",
+        "Discover the all-new Ford Capri and save £1,500 with our exclusive customer saving. Visit your nearest Group 1 Ford dealership to find out more.",
       linkLabel: "Read more",
       href: "#offers",
       image: "/assets/vehicles/puma.jpg",
