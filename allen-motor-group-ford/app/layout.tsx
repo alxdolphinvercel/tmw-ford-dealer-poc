@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Archivo_Narrow } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { dealer } from "@/dealer.config";
 import "./globals.css";
 
@@ -46,6 +47,10 @@ export default function RootLayout({
           Skip to main content
         </a>
         {children}
+        {/* Real-user Core Web Vitals collection (Vercel Speed Insights) —
+            the field-data instrument for these sites while they are too new
+            to appear in the Chrome UX Report. */}
+        <SpeedInsights />
       </body>
     </html>
   );
