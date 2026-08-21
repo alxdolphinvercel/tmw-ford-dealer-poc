@@ -17,8 +17,8 @@ export const dealer: DealerConfig = {
     "Hendy Ford — new and used Ford cars and vans, servicing, MOT and finance across the South Coast, Kent, Surrey, Sussex and Hampshire. Family-run since 1859.",
 
   alert: {
-    text: "Book a Ford test drive this month and unlock up to £1,500 off your next Ford.",
-    linkLabel: "Get offer",
+    text: "September plate event now on — explore the latest Ford models and drive away in your 25-plate today.",
+    linkLabel: "See the event",
     href: "#offers",
   },
 
@@ -122,7 +122,7 @@ export const dealer: DealerConfig = {
         phone: "02380 981680",
         hours: [
           { day: "Monday – Friday", time: "08:00 – 18:00" },
-          { day: "Saturday", time: "08:30 – 12:30" },
+          { day: "Saturday", time: "08:30 – 13:00" },
           { day: "Sunday", time: "Closed" },
         ],
       },
