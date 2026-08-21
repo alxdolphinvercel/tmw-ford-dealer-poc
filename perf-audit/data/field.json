@@ -2,7 +2,7 @@
   "source": "CrUX Vis (cruxvis.withgoogle.com), Chrome UX Report",
   "collected": "2026-08-21",
   "dataAsOf": "2026-08-15",
-  "note": "Field data = 28-day rolling aggregate of real Chrome users. CrUX Vis falls back from page-level (identifier=url) to origin-level (identifier=origin) when a specific page has too few samples; the granularity actually used is recorded per dealer. Our POC sites have no CrUX data by definition — they have no real-user traffic yet — which is why the like-for-like comparison is the lab section.",
+  "note": "Field data = 28-day rolling aggregate of real Chrome users. CrUX Vis falls back from page-level (identifier=url) to origin-level (identifier=origin) when a specific page has too few samples; the granularity actually used is recorded per dealer. Our POC sites have no CrUX data by definition \u2014 they have no real-user traffic yet \u2014 which is why the like-for-like comparison is the lab section.",
   "thresholds": {
     "LCP": "good <= 2.5s",
     "INP": "good <= 200ms",
@@ -57,5 +57,47 @@
       "visualStability": "good and stable",
       "sourceLink": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fwww.hendy.co.uk%2Fford%2F&identifier=url&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
     }
-  ]
+  ],
+  "comment": "CrUX (field) evidence for both sets of pages. The incumbent dealer pages have real-user data; the POC deployments do not, and cannot until they accumulate 28 days of real Chrome traffic. That asymmetry is the finding, not a gap in the audit \u2014 and it is why Vercel Speed Insights was enabled on all five POC projects: it reports the same LCP/INP/CLS from real visitors immediately.",
+  "pocSites": {
+    "cruxStatus": "no data",
+    "checkedOn": "2026-08-21",
+    "tool": "CrUX Vis (cruxvis.withgoogle.com)",
+    "observedNotice": "CrUX data is not available for <url>",
+    "why": "CrUX only reports origins/pages that meet a minimum sample of real Chrome users over a 28-day window. These deployments went live today, so no CrUX record exists for any of them.",
+    "fieldDataInstead": {
+      "tool": "Vercel Speed Insights",
+      "enabledOn": "all five projects (TMW Ford POC team)",
+      "collecting": "LCP, INP, CLS, FCP, TTFB from real visitors",
+      "note": "Data appears in the Vercel dashboard per project as traffic arrives; no 28-day wait."
+    },
+    "urls": [
+      {
+        "dealer": "Lookers Ford",
+        "url": "https://lookers-ford-poc.vercel.app",
+        "cruxVis": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Flookers-ford-poc.vercel.app&identifier=url&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+      },
+      {
+        "dealer": "Evans Halshaw Ford",
+        "url": "https://evanshalshaw-ford-poc.vercel.app",
+        "cruxVis": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fevanshalshaw-ford-poc.vercel.app&identifier=url&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+      },
+      {
+        "dealer": "Allen Motor Group Ford",
+        "url": "https://allen-motor-group-ford-poc.vercel.app",
+        "cruxVis": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fallen-motor-group-ford-poc.vercel.app&identifier=url&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+      },
+      {
+        "dealer": "Group 1 Ford",
+        "url": "https://group1-ford-poc.vercel.app",
+        "cruxVis": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fgroup1-ford-poc.vercel.app&identifier=url&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+      },
+      {
+        "dealer": "Hendy Ford",
+        "url": "https://hendy-ford-poc.vercel.app",
+        "cruxVis": "https://cruxvis.withgoogle.com/#/?view=cwvsummary&url=https%3A%2F%2Fhendy-ford-poc.vercel.app&identifier=url&device=ALL&periodStart=0&periodEnd=-1&display=p75s"
+      }
+    ]
+  },
+  "numericP75Status": "Not captured. CrUX Vis renders p75 values as charts rather than text, and both the PageSpeed Insights API and its web UI are returning 'Quota exceeded' on the shared anonymous quota. Exact p75 figures need a Chrome UX Report API key. The qualitative assessments and trends below come straight from CrUX Vis and are verifiable via the linked views."
 }
