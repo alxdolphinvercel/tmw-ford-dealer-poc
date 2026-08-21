@@ -88,19 +88,41 @@ cd hendy-ford && npm install && npm run dev
 Or preview all five at once — the dev-server definitions are in
 `.claude/launch.json` (ports 3011–3015; the template itself is on 3010).
 
-## Deploying to Vercel
+## Deployed sites
 
-Each directory is a self-contained Next.js project, so each becomes its own
-Vercel project with its own domain:
+All five run in the **TMW Ford POC** Vercel team, built from this repository.
+
+| Dealer | Live URL | Root Directory |
+|---|---|---|
+| Lookers Ford | https://lookers-ford-poc.vercel.app | `lookers-ford` |
+| Evans Halshaw Ford | https://evanshalshaw-ford-poc.vercel.app | `evanshalshaw-ford` |
+| Allen Motor Group Ford | https://allen-motor-group-ford-poc.vercel.app | `allen-motor-group-ford` |
+| Group 1 Ford | https://group1-ford-poc.vercel.app | `group1-ford` |
+| Hendy Ford | https://hendy-ford-poc.vercel.app | `hendy-ford` |
+
+Repository: `alxdolphinvercel/tmw-ford-dealer-poc` (private).
+
+**How it is wired.** One monorepo, five Vercel projects. Each project is
+connected to this same repository and differs only by its **Root Directory** —
+the setting that tells Vercel which site folder to build. Push to `main` and all
+five deploy; open a pull request and each gets its own preview URL.
+
+Production URLs are public, so PageSpeed Insights and other external tools can
+measure them. Preview deployments are SSO-protected to the team, so
+work-in-progress stays internal — anyone added to the TMW Ford POC team can see
+them, along with build logs, deployment history and instant rollback.
+
+At five sites, one push rebuilding all five is a feature. At 190 it would not be:
+production would set an Ignored Build Step per project so a site only rebuilds
+when its own directory changes.
+
+To deploy a change:
 
 ```bash
-cd lookers-ford && vercel --prod
+./build-sites.sh            # re-stamp sites from template/ + configs/
+node check-configs.mjs      # validate content
+git commit -am "..." && git push
 ```
-
-Or in the dashboard: **New Project** → same repository → set **Root Directory**
-to the site's folder. Repeat per dealer. Every page is statically prerendered at
-build time (`○ (Static)` in the build output), so there is no server rendering
-cost per request.
 
 ## Working on the template
 
@@ -162,8 +184,8 @@ star rating. Offer terms are illustrative and would need legal sign-off.
 | Brief requirement | Status |
 |---|---|
 | Up to 6 pilot dealer pages from a single Next.js template | ✅ 5 pages, one template, stamped by script |
-| Next.js framework, hosted on Vercel | ✅ Next.js 16, fully static; each directory is a ready Vercel project (deploy step below) |
-| AI agent handles content updates — no CMS required | ✅ config-file workflow above; validated + rebuilt per site |
+| Next.js framework, hosted on Vercel | ✅ Next.js 16, fully static; **live on Vercel** in the TMW Ford POC team, git-deployed from this repo |
+| AI agent handles content updates — no CMS required | ✅ config-file workflow above; validated, rebuilt and deployed by `git push` |
 | Fixed / Flexible / Free baked into the template structure | ✅ Fixed in `lib/ford.ts` + components; Flexible/Free in `dealer.config.ts` — split derived by diffing the benchmark's Brighton vs Reading sites |
 | Built for the full vision, not just the POC | ✅ `DealerConfig` is the future Contentful content model; national content is single-sourced |
 | The 4 specified dealer links + benchmark structure | ✅ all four dealers built (plus Hendy as the 5th), 13 sections mirroring group1brightonbmw.co.uk |
