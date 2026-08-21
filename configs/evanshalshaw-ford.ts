@@ -24,7 +24,7 @@ export const dealer: DealerConfig = {
   },
 
   hero: {
-    headline: "Your nationwide Ford dealer.",
+    headline: "Your national Ford dealer.",
     strapline:
       "Thirty-two Ford dealerships, dedicated Transit Centres and a nationwide aftersales network — with Click & Collect, mobile servicing and Ford LiiVE wherever you are in the UK.",
     image: "/assets/vehicles/ranger.jpg",
