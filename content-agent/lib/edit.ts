@@ -36,8 +36,8 @@ function parse(source: string, fileName = "config.ts") {
   return ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true);
 }
 
-/** Walks `path` through the AST and returns the string literal it names. */
-function locate(source: string, path: string): Located | null {
+/** Walks `path` through the AST and returns the node it names, if any. */
+function resolve(source: string, path: string): ts.Node | null {
   const file = parse(source);
   const segments = path.split(".");
 
@@ -72,14 +72,21 @@ function locate(source: string, path: string): Located | null {
     node = step(node, segment);
     if (!node) return null;
   }
+  return node;
+}
 
-  // Only string literals are editable. Anything else is refused.
-  if (!ts.isStringLiteral(node) && !ts.isNoSubstitutionTemplateLiteral(node)) {
+/** Resolves a path to a string literal, or null if it is not editable text. */
+function locate(source: string, path: string): Located | null {
+  const node = resolve(source, path);
+  if (
+    !node ||
+    (!ts.isStringLiteral(node) && !ts.isNoSubstitutionTemplateLiteral(node))
+  ) {
     return null;
   }
   return {
     // +1 / -1 to sit inside the quote characters.
-    start: node.getStart(file) + 1,
+    start: node.getStart(node.getSourceFile()) + 1,
     end: node.getEnd() - 1,
     text: node.text,
   };
@@ -119,6 +126,44 @@ function step(node: ts.Node, segment: string): ts.Node | undefined {
 /** Reads the current value at a path, or null if it is not an editable string. */
 export function readPath(source: string, path: string): string | null {
   return locate(source, path)?.text ?? null;
+}
+
+/**
+ * Expands an allowlist pattern into the concrete paths that exist in `source`.
+ *
+ * Only a whole segment equal to "N" is an index placeholder. Matching on the
+ * substring "N" would also match the N inside identifiers such as
+ * FORD_CAMPAIGNS, which silently corrupts every national path.
+ */
+export function expandPath(source: string, pattern: string): string[] {
+  const segments = pattern.split(".");
+  let prefixes: string[][] = [[]];
+
+  for (const segment of segments) {
+    const next: string[][] = [];
+    for (const prefix of prefixes) {
+      if (segment !== "N") {
+        next.push([...prefix, segment]);
+        continue;
+      }
+      // Walk indices upward until one is absent; arrays here are short and dense.
+      for (let i = 0; i < 64; i++) {
+        const candidate = [...prefix, String(i)];
+        if (!exists(source, candidate.join("."))) break;
+        next.push(candidate);
+      }
+    }
+    prefixes = next;
+  }
+
+  return prefixes
+    .map((parts) => parts.join("."))
+    .filter((path) => readPath(source, path) !== null);
+}
+
+/** True if any node exists at `path`, string literal or not. */
+function exists(source: string, path: string): boolean {
+  return resolve(source, path) !== null;
 }
 
 /**

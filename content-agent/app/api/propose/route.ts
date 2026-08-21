@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { getTarget, isAllowed } from "@/lib/targets";
-import { readPath, applyEdits, type Edit } from "@/lib/edit";
+import { readPath, expandPath, applyEdits, type Edit } from "@/lib/edit";
 import { readFile, openPullRequest, getPreviews } from "@/lib/github";
 
 export const maxDuration = 300;
@@ -58,23 +58,13 @@ export async function POST(request: Request) {
         const source = await readFile(target.files[0]);
 
         // 2. Show the model only the fields it is allowed to change.
-        const current = target.paths.flatMap((entry) => {
-          if (entry.path.includes("N")) {
-            // Expand indexed paths against what actually exists.
-            const found: { path: string; label: string; value: string }[] = [];
-            for (let i = 0; i < 12; i++) {
-              for (let j = 0; j < 12; j++) {
-                const path = entry.path.replace("N", String(i)).replace("N", String(j));
-                if (path.includes("N")) continue;
-                const value = readPath(source, path);
-                if (value !== null) found.push({ path, label: entry.label, value });
-              }
-            }
-            return found;
-          }
-          const value = readPath(source, entry.path);
-          return value === null ? [] : [{ path: entry.path, label: entry.label, value }];
-        });
+        const current = target.paths.flatMap((entry) =>
+          expandPath(source, entry.path).map((path) => ({
+            path,
+            label: entry.label,
+            value: readPath(source, path) as string,
+          }))
+        );
 
         send({
           step: "proposing",
@@ -176,12 +166,13 @@ export async function POST(request: Request) {
 
         // 5. Wait for Vercel to build the preview(s).
         send({ step: "previewing", message: "Waiting for Vercel preview build" });
-        const expected = targetId === "national" ? 5 : 1;
+        const expected = target.projects.length;
         let previews: Awaited<ReturnType<typeof getPreviews>> = [];
 
-        for (let attempt = 0; attempt < 40; attempt++) {
+        const budget = expected > 1 ? 72 : 40; // ~6 min for five sites, ~3 for one
+        for (let attempt = 0; attempt < budget; attempt++) {
           await new Promise((r) => setTimeout(r, 5000));
-          previews = await getPreviews(branch);
+          previews = await getPreviews(pr.sha, target.projects);
           const ready = previews.filter((p) => p.state === "success");
           send({
             step: "previewing",

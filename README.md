@@ -61,23 +61,80 @@ local welcome → about grid → legal notes → tabbed department contact → f
 
 ## Content updates by AI agent (no CMS at this stage)
 
-The brief specifies an AI agent handling content updates, with no CMS until
-stage 2. That is what the config model is for — a content update is a plain-text
-edit with a validator and a deterministic pipeline behind it:
+The brief asks for an AI agent to handle content updates with no CMS. That is
+built: **`content-agent/`** — the *Ford Dealer Content Agent*, a sixth Vercel
+project in the TMW Ford POC team.
 
-1. **Edit** — the agent changes fields in `configs/<site>.ts` ("swap Hendy's
-   alert-bar offer", "update Group 1's Saturday service hours"). Copy, imagery,
-   hours, phones and theming are all data; no component code is touched.
-2. **Validate** — `node check-configs.mjs` rejects missing images, duplicate
-   photography, and copy that names a different model than its image shows.
-3. **Rebuild** — `./build-sites.sh <site>` re-stamps the affected site;
-   `vercel --prod` redeploys it. Nothing else in the network changes.
+An operator picks a target, types an instruction in plain English, and watches
+the agent work: read → propose → validate → commit → preview. The output is a
+**pull request** with a per-field diff and a live preview URL. Nothing reaches a
+live site until a person merges.
 
-Because the Fixed layer lives in `template/lib/ford.ts`, a national change (a
-new campaign, revised legal copy) is one edit followed by `./build-sites.sh`
-with no argument — all five sites pick it up identically. At stage 2 the same
-`DealerConfig` shape becomes the Contentful content model, and the agent writes
-through the Contentful API instead of to files.
+```
+Instruction:  "Saturday service hours are now 08:30 – 13:00"
+      ↓
+  reading      configs/hendy-ford.ts
+  proposing    considering 181 editable fields
+  validating   checking 2 proposed edit(s)
+  diff         location.departments.1.hours.1.time   08:30 – 12:30 → 08:30 – 13:00
+  committing   pull request #12 opened
+  previewing   1/1 preview ready → https://hendy-ford-…vercel.app
+```
+
+### Why it is safe to let an agent do this
+
+**The model never writes TypeScript.** It returns field *paths* and replacement
+*text*; `lib/edit.ts` locates the exact string-literal node with the TypeScript
+compiler API and splices the new value in by character offset. Generation
+therefore cannot introduce a syntax error, drop a field, or reformat the file —
+the three ways an LLM rewriting a config normally breaks a build.
+
+**The agent can only touch content.** `lib/targets.ts` is an allowlist of
+editable paths. Anything else — page structure, navigation, legal boilerplate,
+component code — is refused, and the refusal is shown to the operator. Ask it to
+add a section or edit the nav and it declines with a reason.
+
+**Every change is a reviewable PR**, so the audit trail, approval gate, preview
+and rollback all come from GitHub and Vercel rather than from a CMS.
+
+### One instruction, all five sites
+
+Selecting *All five sites — Ford national content* targets
+`template/lib/ford.ts`. Because the site directories hold copies stamped by
+`build-sites.sh`, the agent mirrors each edit into every copy — so a national
+change writes 6 files, opens 1 PR, and rebuilds all five sites. At 190 sites it
+is the same single instruction.
+
+### What it can change
+
+| Layer | Fields |
+|---|---|
+| Free | Alert bar, hero headline and strapline, promo tile, staff quote, welcome paragraph, page title and meta description |
+| Flexible | Phone numbers, opening hours per department, address, areas served, accreditations |
+| Theming | Accent and dark-band colours |
+| National | Ford campaign headings and body copy (`FORD_CAMPAIGNS`) |
+
+### Running and configuring it
+
+```bash
+cd content-agent && vercel env pull .env.local && npm run dev
+```
+
+Secrets: **one** — `GITHUB_TOKEN`, for opening pull requests. The model is
+reached through **AI Gateway using OIDC**, so there is no AI key, and preview
+URLs are read from GitHub's own deployments API, so there is no Vercel token
+either.
+
+Access is restricted to the TMW Ford POC team by Vercel SSO on all deployment
+URLs, since the console can write to the repository.
+
+### Limits worth stating plainly
+
+Structural validation catches malformed edits, **not false statements**. The
+agent is instructed never to invent prices, APR figures or dates, but it can
+still produce copy that is wrong. Finance and offer terms are FCA-regulated, so
+the pull-request review is a compliance requirement, not a convenience. The UI
+says so on every screen.
 
 ## Running locally
 
@@ -99,6 +156,12 @@ All five run in the **TMW Ford POC** Vercel team, built from this repository.
 | Allen Motor Group Ford | https://allen-motor-group-ford-poc.vercel.app | `allen-motor-group-ford` |
 | Group 1 Ford | https://group1-ford-poc.vercel.app | `group1-ford` |
 | Hendy Ford | https://hendy-ford-poc.vercel.app | `hendy-ford` |
+
+Plus the content agent, team-only:
+
+| Tool | URL | Root Directory |
+|---|---|---|
+| Ford Dealer Content Agent | https://content-agent-tmw-ford-poc.vercel.app | `content-agent` |
 
 Repository: `alxdolphinvercel/tmw-ford-dealer-poc` (private).
 
@@ -185,7 +248,7 @@ star rating. Offer terms are illustrative and would need legal sign-off.
 |---|---|
 | Up to 6 pilot dealer pages from a single Next.js template | ✅ 5 pages, one template, stamped by script |
 | Next.js framework, hosted on Vercel | ✅ Next.js 16, fully static; **live on Vercel** in the TMW Ford POC team, git-deployed from this repo |
-| AI agent handles content updates — no CMS required | ✅ config-file workflow above; validated, rebuilt and deployed by `git push` |
+| AI agent handles content updates — no CMS required | ✅ **Ford Dealer Content Agent** (`content-agent/`) — natural-language instruction → validated edit → pull request → preview URL |
 | Fixed / Flexible / Free baked into the template structure | ✅ Fixed in `lib/ford.ts` + components; Flexible/Free in `dealer.config.ts` — split derived by diffing the benchmark's Brighton vs Reading sites |
 | Built for the full vision, not just the POC | ✅ `DealerConfig` is the future Contentful content model; national content is single-sourced |
 | The 4 specified dealer links + benchmark structure | ✅ all four dealers built (plus Hendy as the 5th), 13 sections mirroring group1brightonbmw.co.uk |

@@ -77,6 +77,8 @@ export interface Target {
   name: string;
   /** Files an edit must write, source first. */
   files: string[];
+  /** Vercel projects whose previews are worth showing for this target. */
+  projects: string[];
   paths: EditablePath[];
 }
 
@@ -93,6 +95,7 @@ export const TARGETS: Target[] = [
     id: site.id,
     name: site.name,
     files: [`configs/${site.id}.ts`, `${site.id}/dealer.config.ts`],
+    projects: [`${site.id}-poc`],
     paths: DEALER_PATHS,
   })),
   {
@@ -102,6 +105,7 @@ export const TARGETS: Target[] = [
       "template/lib/ford.ts",
       ...SITES.map((site) => `${site.id}/lib/ford.ts`),
     ],
+    projects: SITES.map((site) => `${site.id}-poc`),
     paths: NATIONAL_PATHS,
   },
 ];

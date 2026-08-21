@@ -54,7 +54,7 @@ export async function openPullRequest(opts: {
   title: string;
   body: string;
   changes: FileChange[];
-}): Promise<{ number: number; url: string; branch: string }> {
+}): Promise<{ number: number; url: string; branch: string; sha: string }> {
   const { branch, title, body, changes } = opts;
 
   const baseRef = await gh<{ object: { sha: string } }>(
@@ -118,7 +118,8 @@ export async function openPullRequest(opts: {
     }
   );
 
-  return { number: pr.number, url: pr.html_url, branch };
+  // The head SHA, not the branch name, is what deployments are keyed on.
+  return { number: pr.number, url: pr.html_url, branch, sha: commit.sha };
 }
 
 export interface Preview {
@@ -128,27 +129,43 @@ export interface Preview {
 }
 
 /**
- * Looks up the Vercel preview deployments for a branch.
+ * Looks up the Vercel preview deployments for a commit.
  *
- * Vercel creates a GitHub deployment per project, named "Preview – <project>",
- * and attaches the URL to its latest status. Returns whatever exists so far;
- * the caller polls.
+ * Keyed on the commit SHA, not the branch: GitHub registers deployments against
+ * the SHA, and querying by `ref` returns nothing. Vercel creates one deployment
+ * per project named "Preview – <project>" and puts the live preview URL in its
+ * latest status's `environment_url`.
+ *
+ * Because this is a monorepo, every push builds all six projects. `projects`
+ * filters to the ones the edit actually affects, so a single-dealer change does
+ * not show five irrelevant previews.
  */
-export async function getPreviews(branch: string): Promise<Preview[]> {
-  const deployments = await gh<
-    { id: number; environment: string; statuses_url: string }[]
-  >(`/repos/${OWNER}/${REPO}/deployments?ref=${encodeURIComponent(branch)}`);
+export async function getPreviews(
+  sha: string,
+  projects: string[]
+): Promise<Preview[]> {
+  const deployments = await gh<{ id: number; environment: string }[]>(
+    `/repos/${OWNER}/${REPO}/deployments?sha=${encodeURIComponent(sha)}`
+  );
+
+  const relevant = deployments
+    .map((deployment) => ({
+      id: deployment.id,
+      project: deployment.environment.replace(/^Preview\s*[–-]\s*/, "").trim(),
+    }))
+    .filter((d) => projects.includes(d.project));
 
   const previews = await Promise.all(
-    deployments.map(async (deployment) => {
+    relevant.map(async (deployment) => {
       const statuses = await gh<
-        { state: string; environment_url?: string; target_url?: string }[]
+        { state: string; environment_url?: string }[]
       >(`/repos/${OWNER}/${REPO}/deployments/${deployment.id}/statuses`);
-      const latest = statuses[0];
+      // Statuses are newest-first; prefer one that carries a URL.
+      const withUrl = statuses.find((s) => s.environment_url);
       return {
-        project: deployment.environment.replace(/^Preview\s*[–-]\s*/, ""),
-        url: latest?.environment_url ?? latest?.target_url ?? "",
-        state: latest?.state ?? "pending",
+        project: deployment.project,
+        url: withUrl?.environment_url ?? "",
+        state: withUrl?.state ?? statuses[0]?.state ?? "pending",
       };
     })
   );
