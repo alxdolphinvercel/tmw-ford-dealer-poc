@@ -174,3 +174,4 @@ star rating. Offer terms are illustrative and would need legal sign-off.
 The brief also asks for proof-of-concept cost, timeline to working demo, and
 indicative Vercel + Contentful hosting cost at 190 sites. Those are commercial
 figures for the account team — deliberately not estimated here.
+
