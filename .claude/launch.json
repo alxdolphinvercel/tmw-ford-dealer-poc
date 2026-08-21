@@ -4,44 +4,93 @@
     {
       "name": "template",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3010"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3010"
+      ],
       "cwd": "template",
       "port": 3010
     },
     {
       "name": "lookers",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3011"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3011"
+      ],
       "cwd": "lookers-ford",
       "port": 3011
     },
     {
       "name": "evanshalshaw",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3012"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3012"
+      ],
       "cwd": "evanshalshaw-ford",
       "port": 3012
     },
     {
       "name": "allen",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3013"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3013"
+      ],
       "cwd": "allen-motor-group-ford",
       "port": 3013
     },
     {
       "name": "group1",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3014"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3014"
+      ],
       "cwd": "group1-ford",
       "port": 3014
     },
     {
       "name": "hendy",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3015"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3015"
+      ],
       "cwd": "hendy-ford",
       "port": 3015
+    },
+    {
+      "name": "content-agent",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3020"
+      ],
+      "cwd": "content-agent",
+      "port": 3020
     }
   ]
 }

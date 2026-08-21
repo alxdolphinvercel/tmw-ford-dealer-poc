@@ -1,0 +1,102 @@
+/* Ford Dealer Content Agent — operator tooling, not a marketing page.
+   Palette and type match the Core Web Vitals audit so the deliverables read as
+   one programme. */
+
+:root {
+  --ford-blue: #00095b;
+  --ford-skyview: #066fef;
+
+  --ink: #0e1726;
+  --ink-2: #48566b;
+  --ink-3: #7a8798;
+  --surface: #ffffff;
+  --panel: #f4f6f9;
+  --line: #dfe4eb;
+
+  --good: #0f6b45;
+  --warn: #d69100;
+  --poor: #b32718;
+  --accent: #0b5fd0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #e7ecf3;
+    --ink-2: #a8b4c4;
+    --ink-3: #7d8a9c;
+    --surface: #0d1219;
+    --panel: #151c26;
+    --line: #26303d;
+
+    --good: #009162;
+    --warn: #a48200;
+    --poor: #b3363d;
+    --accent: #3a81d7;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ink: #e7ecf3;
+  --ink-2: #a8b4c4;
+  --ink-3: #7d8a9c;
+  --surface: #0d1219;
+  --panel: #151c26;
+  --line: #26303d;
+  --good: #009162;
+  --warn: #a48200;
+  --poor: #b3363d;
+  --accent: #3a81d7;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+code,
+kbd,
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+button,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
