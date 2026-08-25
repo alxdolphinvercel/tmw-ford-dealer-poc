@@ -59,60 +59,63 @@ header with full-screen overlay nav → hero → trust bar → model spotlight �
 dual stock locators → news & offers → six alternating campaign banners →
 local welcome → about grid → legal notes → tabbed department contact → footer.
 
-## Content updates by AI agent (no CMS at this stage)
+## Content updates by marketers (no CMS at this stage)
 
-The brief asks for an AI agent to handle content updates with no CMS. That is
-built: **`content-agent/`** — the *Ford Dealer Content Agent*, a sixth Vercel
-project in the TMW Ford POC team.
+The brief asks for content updates to happen without a CMS and without a
+developer in the loop. That is built: **`content-agent/`** — the *Ford Dealer
+Content Editor*, a sixth Vercel project in the TMW Ford POC team.
 
-An operator picks a target, types an instruction in plain English, and watches
-the agent work: read → propose → validate → commit → preview. The output is a
-**pull request** with a per-field diff and a live preview URL. Nothing reaches a
-live site until a person merges.
+A marketer picks a dealer (or *All five sites* for national campaign copy),
+edits labelled fields grouped by governance layer beside a live preview of the
+real site, and clicks **Publish**. The change is served to every visitor within
+seconds — no build, no deployment, no git, no pull request.
 
 ```
-Instruction:  "Saturday service hours are now 08:30 – 13:00"
-      ↓
-  reading      configs/hendy-ford.ts
-  proposing    considering 181 editable fields
-  validating   checking 2 proposed edit(s)
-  diff         location.departments.1.hours.1.time   08:30 – 12:30 → 08:30 – 13:00
-  committing   pull request #12 opened
-  previewing   1/1 preview ready → https://hendy-ford-…vercel.app
+   Editor form                      Live site
+   hero.headline: "Welcome…"   →    ?draft=…   (private draft, as you type)
+   [Publish 2 changes]         →    Edge Config (live in ~10 s, no deploy)
 ```
 
-### Why it is safe to let an agent do this
+**How it works.** Every editable value lives in one shared **Vercel Edge
+Config** store — a flat `path → value` map per dealer plus one `national` item.
+Each site's page renders per request and merges those overrides over the
+`dealer.config.ts` baked into its build (`template/lib/overrides.ts`), so the
+config files in git remain the defaults and the single seed source. While the
+marketer types, the preview pane shows an unsaved draft via a `?draft=`
+parameter that only that browser sees.
 
-**The model never writes TypeScript.** It returns field *paths* and replacement
-*text*; `lib/edit.ts` locates the exact string-literal node with the TypeScript
-compiler API and splices the new value in by character offset. Generation
-therefore cannot introduce a syntax error, drop a field, or reformat the file —
-the three ways an LLM rewriting a config normally breaks a build.
+### AI assist
 
-**The agent can only touch content.** `lib/targets.ts` is an allowlist of
-editable paths. Anything else — page structure, navigation, legal boilerplate,
-component code — is refused, and the refusal is shown to the operator. Ask it to
-add a section or edit the nav and it declines with a reason.
+The natural-language agent survives as a copilot inside the editor. Type an
+instruction — *"Saturday service hours are now 08:30 – 13:00"* — and the model
+proposes values for specific fields, which appear highlighted in the form with
+its reasoning. Nothing publishes until the marketer reviews and clicks Publish.
 
-**Every change is a reviewable PR**, so the audit trail, approval gate, preview
-and rollback all come from GitHub and Vercel rather than from a CMS.
+### Why it is safe to let marketers (and the AI) do this
 
-### One instruction, all five sites
+**Only content can change.** `lib/targets.ts` is an allowlist of editable
+paths, enforced server-side on every publish — whether the value came from the
+form, the AI, or a hand-crafted request. Page structure, navigation, legal
+boilerplate and component code are rejected with a reason.
 
-Selecting *All five sites — Ford national content* targets
-`template/lib/ford.ts`. Because the site directories hold copies stamped by
-`build-sites.sh`, the agent mirrors each edit into every copy — so a national
-change writes 6 files, opens 1 PR, and rebuilds all five sites. At 190 sites it
-is the same single instruction.
+**Overrides can never break a site.** The merge in `template/lib/overrides.ts`
+only replaces values where the baked config already holds a string. A malformed
+or malicious override cannot add fields, change structure, or take a site down —
+the worst case is unchanged content. With no Edge Config connected (local dev),
+sites render their baked config exactly as before.
 
-### What it can change
+**Reset is one command.** `npm run seed` in `content-agent/` re-extracts every
+editable value from git and overwrites the store — the demo reset story, and
+the rollback story.
+
+### What can change
 
 | Layer | Fields |
 |---|---|
 | Free | Alert bar, hero headline and strapline, promo tile, staff quote, welcome paragraph, page title and meta description |
 | Flexible | Phone numbers, opening hours per department, address, areas served, accreditations |
-| Theming | Accent and dark-band colours |
-| National | Ford campaign headings and body copy (`FORD_CAMPAIGNS`) |
+| Theming | Accent and dark-band colours (with a colour picker) |
+| National | Ford campaign headings and body copy, on all five sites at once |
 
 ### Running and configuring it
 
@@ -120,21 +123,24 @@ is the same single instruction.
 cd content-agent && vercel env pull .env.local && npm run dev
 ```
 
-Secrets: **one** — `GITHUB_TOKEN`, for opening pull requests. The model is
-reached through **AI Gateway using OIDC**, so there is no AI key, and preview
-URLs are read from GitHub's own deployments API, so there is no Vercel token
-either.
+Environment: the sites and the editor read the store through the `EDGE_CONFIG`
+connection string (added automatically when the Edge Config is connected to
+each project). The editor's server routes additionally need `EDGE_CONFIG_ID`,
+`VERCEL_TEAM_ID` and `VERCEL_API_TOKEN` to write. The AI assist reaches the
+model through **AI Gateway using OIDC**, so there is still no AI key, and the
+GitHub token is gone along with the PR flow.
 
 Access is restricted to the TMW Ford POC team by Vercel SSO on all deployment
-URLs, since the console can write to the repository.
+URLs, since the editor publishes straight to the live sites.
 
 ### Limits worth stating plainly
 
-Structural validation catches malformed edits, **not false statements**. The
-agent is instructed never to invent prices, APR figures or dates, but it can
-still produce copy that is wrong. Finance and offer terms are FCA-regulated, so
-the pull-request review is a compliance requirement, not a convenience. The UI
-says so on every screen.
+Publishing is direct — there is no approval gate in this POC. The allowlist
+catches edits to the wrong *fields*, **not false statements**: the AI is
+instructed never to invent prices, APR figures or dates, but a person or model
+can still publish copy that is wrong, and finance and offer terms are
+FCA-regulated. At production scale this needs a review step (draft → approve)
+and per-user roles; both fit naturally on top of the same store.
 
 ## Running locally
 
@@ -157,11 +163,11 @@ All five run in the **TMW Ford POC** Vercel team, built from this repository.
 | Group 1 Ford | https://group1-ford-poc.vercel.app | `group1-ford` |
 | Hendy Ford | https://hendy-ford-poc.vercel.app | `hendy-ford` |
 
-Plus the content agent, team-only:
+Plus the content editor, team-only:
 
 | Tool | URL | Root Directory |
 |---|---|---|
-| Ford Dealer Content Agent | https://content-agent-tmw-ford-poc.vercel.app | `content-agent` |
+| Ford Dealer Content Editor | https://content-agent-tmw-ford-poc.vercel.app | `content-agent` |
 
 Repository: `alxdolphinvercel/tmw-ford-dealer-poc` (private).
 
@@ -211,8 +217,9 @@ the mistakes that are easy to make when populating one template five times.
 
 ## Notes on the build
 
-- **Performance** — fully static, no client data fetching, ~4 kB of interactive
-  JS (nav overlay, alert dismiss, contact tabs). All imagery goes through
+- **Performance** — server-rendered per request (a sub-millisecond Edge Config
+  read merges published content overrides), no client data fetching, ~4 kB of
+  interactive JS (nav overlay, alert dismiss, contact tabs). All imagery goes through
   `next/image`; scroll reveals are CSS scroll-driven animations, not a JS library.
 - **Search** — every department's address, hours and phone is rendered into the
   HTML (hidden tabs use the `hidden` attribute, not conditional rendering) and
@@ -248,7 +255,7 @@ star rating. Offer terms are illustrative and would need legal sign-off.
 |---|---|
 | Up to 6 pilot dealer pages from a single Next.js template | ✅ 5 pages, one template, stamped by script |
 | Next.js framework, hosted on Vercel | ✅ Next.js 16, fully static; **live on Vercel** in the TMW Ford POC team, git-deployed from this repo |
-| AI agent handles content updates — no CMS required | ✅ **Ford Dealer Content Agent** (`content-agent/`) — natural-language instruction → validated edit → pull request → preview URL |
+| AI agent handles content updates — no CMS required | ✅ **Ford Dealer Content Editor** (`content-agent/`) — form editing with AI assist → validated against the allowlist → published to Edge Config, live in seconds |
 | Fixed / Flexible / Free baked into the template structure | ✅ Fixed in `lib/ford.ts` + components; Flexible/Free in `dealer.config.ts` — split derived by diffing the benchmark's Brighton vs Reading sites |
 | Built for the full vision, not just the POC | ✅ `DealerConfig` is the future Contentful content model; national content is single-sourced |
 | The 4 specified dealer links + benchmark structure | ✅ all four dealers built (plus Hendy as the 5th), 13 sections mirroring group1brightonbmw.co.uk |

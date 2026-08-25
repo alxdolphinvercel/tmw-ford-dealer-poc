@@ -3,6 +3,8 @@ import { nationalBanners, NATIONAL_LEGAL } from "@/lib/content";
 
 /** Evans Halshaw Ford — nationwide scale/value. Palette from evanshalshaw.com. */
 export const dealer: DealerConfig = {
+  id: "evanshalshaw-ford",
+
   brand: {
     name: "Evans Halshaw Ford",
     shortName: "Evans Halshaw",

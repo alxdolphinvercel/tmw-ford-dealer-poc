@@ -22,9 +22,9 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ford Dealer Content Agent",
+  title: "Ford Dealer Content Editor",
   description:
-    "Proof of concept — natural-language content updates to Ford dealer sites, applied as reviewable pull requests.",
+    "Proof of concept — marketer-facing content editing for Ford dealer sites, published instantly via Vercel Edge Config.",
 };
 
 export default function RootLayout({

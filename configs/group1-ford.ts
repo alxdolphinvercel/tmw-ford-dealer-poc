@@ -6,6 +6,8 @@ import { nationalBanners, NATIONAL_LEGAL } from "@/lib/content";
  * group1auto.co.uk, whose live type stack is also Figtree/Nunito.
  */
 export const dealer: DealerConfig = {
+  id: "group1-ford",
+
   brand: {
     name: "Group 1 Ford",
     shortName: "Group 1",

@@ -3,6 +3,8 @@ import { nationalBanners, NATIONAL_LEGAL } from "@/lib/content";
 
 /** Hendy Ford — family South-Coast group, heritage since 1859. Palette from hendy.co.uk. */
 export const dealer: DealerConfig = {
+  id: "hendy-ford",
+
   brand: {
     name: "Hendy Ford",
     shortName: "Hendy",

@@ -6,6 +6,8 @@ import { nationalBanners, NATIONAL_LEGAL } from "@/lib/content";
  * Essex Ford and SMC Ford. Palette from allenmotorgroup.co.uk.
  */
 export const dealer: DealerConfig = {
+  id: "allen-motor-group-ford",
+
   brand: {
     name: "Allen Motor Group Ford",
     shortName: "Allen Motor Group",

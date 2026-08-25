@@ -3,6 +3,8 @@ import { nationalBanners, NATIONAL_LEGAL } from "@/lib/content";
 
 /** Lookers Ford — deal-led national group. Palette from lookers.co.uk. */
 export const dealer: DealerConfig = {
+  id: "lookers-ford",
+
   brand: {
     name: "Lookers Ford",
     shortName: "Lookers",

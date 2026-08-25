@@ -1,16 +1,15 @@
 /**
- * What the agent is allowed to change, and which files each change must touch.
+ * What the editor is allowed to change — the governance surface.
  *
- * Two things live here because they are the governance surface:
+ * The editable-path allowlist below is the whole permission model. Any path
+ * not listed here is rejected server-side, whether it arrives from the form,
+ * the AI assist, or a hand-crafted request. This is what stops content edits
+ * touching navigation, legal boilerplate, component code or anything else
+ * Ford governs centrally.
  *
- * 1. The editable-path allowlist. Any path the model proposes that is not here
- *    is refused. This is what stops the agent touching navigation, legal
- *    boilerplate, component code or anything else Ford governs centrally.
- *
- * 2. The file mirroring. The five site directories hold copies stamped by
- *    build-sites.sh, so editing only the source would merge a PR that changes
- *    nothing on the live site. Every target lists all the files an edit must
- *    write.
+ * Each target maps to one Edge Config item (keyed by target id): a flat map
+ * of concrete path → published value. Sites merge those items over their
+ * baked-in dealer.config.ts at request time (template/lib/overrides.ts).
  */
 
 export type Layer = "Free" | "Flexible" | "Theming" | "National";
@@ -59,7 +58,7 @@ export const DEALER_PATHS: EditablePath[] = [
   { path: "brand.navy", layer: "Theming", label: "Dark band colour" },
 ];
 
-/** National paths (template/lib/ford.ts, mirrored into all five sites). */
+/** National paths (Fixed Ford campaign copy, shared by all five sites). */
 export const NATIONAL_PATHS: EditablePath[] = [
   "options",
   "electricGrant",
@@ -75,14 +74,12 @@ export const NATIONAL_PATHS: EditablePath[] = [
 export interface Target {
   id: string;
   name: string;
-  /** Files an edit must write, source first. */
-  files: string[];
-  /** Vercel projects whose previews are worth showing for this target. */
-  projects: string[];
+  /** Live site rendered in the editor's preview pane, if the target has one. */
+  previewUrl?: string;
   paths: EditablePath[];
 }
 
-const SITES = [
+export const SITES = [
   { id: "lookers-ford", name: "Lookers Ford" },
   { id: "evanshalshaw-ford", name: "Evans Halshaw Ford" },
   { id: "allen-motor-group-ford", name: "Allen Motor Group Ford" },
@@ -94,18 +91,12 @@ export const TARGETS: Target[] = [
   ...SITES.map((site) => ({
     id: site.id,
     name: site.name,
-    files: [`configs/${site.id}.ts`, `${site.id}/dealer.config.ts`],
-    projects: [`${site.id}-poc`],
+    previewUrl: `https://${site.id}-poc.vercel.app`,
     paths: DEALER_PATHS,
   })),
   {
     id: "national",
     name: "All five sites — Ford national content",
-    files: [
-      "template/lib/ford.ts",
-      ...SITES.map((site) => `${site.id}/lib/ford.ts`),
-    ],
-    projects: SITES.map((site) => `${site.id}-poc`),
     paths: NATIONAL_PATHS,
   },
 ];
@@ -120,8 +111,13 @@ export function getTarget(id: string): Target | undefined {
  * `location.departments.N.hours.N.time`.
  */
 export function isAllowed(target: Target, path: string): boolean {
+  return entryFor(target, path) !== undefined;
+}
+
+/** The allowlist entry matching a concrete path — for its label and layer. */
+export function entryFor(target: Target, path: string): EditablePath | undefined {
   const actual = path.split(".");
-  return target.paths.some((entry) => {
+  return target.paths.find((entry) => {
     const pattern = entry.path.split(".");
     if (pattern.length !== actual.length) return false;
     return pattern.every((segment, i) =>

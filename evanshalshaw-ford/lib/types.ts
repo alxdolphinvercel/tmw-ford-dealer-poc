@@ -105,6 +105,9 @@ export interface ModelSpotlight {
 }
 
 export interface DealerConfig {
+  /** Site id — directory name, Vercel project prefix, and Edge Config key. */
+  id: string;
+
   brand: DealerBrand;
   location: DealerLocation;
   trust: TrustSignals;

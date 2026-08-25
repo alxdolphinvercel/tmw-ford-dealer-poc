@@ -9,6 +9,8 @@ import { nationalBanners, NATIONAL_LEGAL } from "@/lib/content";
  * Flexible (identity, locations, trust) and Free (editorial) content layers.
  */
 export const dealer: DealerConfig = {
+  id: "hendy-ford",
+
   brand: {
     name: "Hendy Ford",
     shortName: "Hendy",

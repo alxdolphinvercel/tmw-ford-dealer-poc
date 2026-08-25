@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Archivo_Narrow } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { dealer } from "@/dealer.config";
+import { getDealer } from "@/lib/overrides";
 import "./globals.css";
 
 /* Ford Antenna is proprietary; DM Sans + Archivo Narrow are the closest
@@ -20,29 +20,22 @@ const display = Archivo_Narrow({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: dealer.metaTitle,
-  description: dealer.metaDescription,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const dealer = await getDealer();
+  return {
+    title: dealer.metaTitle,
+    description: dealer.metaDescription,
+  };
+}
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { brand } = dealer;
   return (
     <html lang="en-GB">
-      <body
-        className={`${body.variable} ${display.variable}`}
-        style={
-          {
-            "--accent": brand.accent,
-            "--accent-dark": brand.accentDark,
-            "--navy": brand.navy,
-          } as React.CSSProperties
-        }
-      >
+      <body className={`${body.variable} ${display.variable}`}>
         <a className="skipLink" href="#main-content">
           Skip to main content
         </a>
