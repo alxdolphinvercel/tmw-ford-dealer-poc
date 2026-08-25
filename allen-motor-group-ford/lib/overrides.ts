@@ -15,11 +15,69 @@ import type { DealerConfig } from "./types";
  * National paths address the Fixed campaign copy:
  *   { "FORD_CAMPAIGNS.options.heading": "…", "FORD_CAMPAIGNS.options.body.0": "…" }
  *
- * A path is only applied where the baked config already holds a string —
- * overrides can restyle content but can never add fields, change structure,
- * or inject non-string values. With no EDGE_CONFIG env (local dev, or a site
- * not yet connected) the baked config renders unchanged.
+ * A path is only applied if it is on the editable-content allowlist below AND
+ * the baked config already holds a string there — overrides can restyle
+ * content but can never touch legal text, navigation or structure, add
+ * fields, or inject non-string values. The site enforces this itself rather
+ * than trusting whoever wrote the store or crafted a draft link. With no
+ * EDGE_CONFIG env (local dev, or a site not yet connected) the baked config
+ * renders unchanged.
  */
+
+/**
+ * Editable-content allowlist — `N` stands for an array index. Must stay in
+ * sync with the labelled master list in content-agent/lib/targets.ts.
+ */
+const ALLOWED_PATHS = [
+  // Free — dealer editorial
+  "alert.text",
+  "alert.linkLabel",
+  "hero.headline",
+  "hero.strapline",
+  "newsOffers.promo.eyebrow",
+  "newsOffers.promo.heading",
+  "newsOffers.promo.body",
+  "newsOffers.promo.linkLabel",
+  "newsOffers.quote.name",
+  "newsOffers.quote.role",
+  "newsOffers.quote.quote",
+  "welcome.heading",
+  "welcome.body",
+  "metaTitle",
+  "metaDescription",
+  // Flexible — dealer facts
+  "location.phone",
+  "location.areasServed",
+  "location.address.name",
+  "location.address.street",
+  "location.address.locality",
+  "location.address.region",
+  "location.address.postcode",
+  "location.departments.N.label",
+  "location.departments.N.phone",
+  "location.departments.N.hours.N.day",
+  "location.departments.N.hours.N.time",
+  "trust.accreditations.N",
+  // Theming — dealer palette
+  "brand.accent",
+  "brand.accentDark",
+  "brand.navy",
+  // National — Ford campaign copy
+  ...["options", "electricGrant", "powerPromise", "service", "charging", "business"].flatMap(
+    (key) => [`FORD_CAMPAIGNS.${key}.heading`, `FORD_CAMPAIGNS.${key}.body.N`]
+  ),
+];
+
+function isAllowedPath(path: string): boolean {
+  const actual = path.split(".");
+  return ALLOWED_PATHS.some((pattern) => {
+    const segments = pattern.split(".");
+    if (segments.length !== actual.length) return false;
+    return segments.every((segment, i) =>
+      segment === "N" ? /^\d+$/.test(actual[i]) : segment === actual[i]
+    );
+  });
+}
 
 /** Campaign order — must match nationalBanners() in lib/content.ts. */
 const CAMPAIGN_ORDER = [
@@ -53,7 +111,7 @@ function applyFlat(config: DealerConfig, flat: unknown): void {
   if (!flat || typeof flat !== "object") return;
 
   for (const [path, value] of Object.entries(flat as Record<string, unknown>)) {
-    if (typeof value !== "string") continue;
+    if (typeof value !== "string" || !isAllowedPath(path)) continue;
     setPath(config, translate(path), value);
   }
 }
