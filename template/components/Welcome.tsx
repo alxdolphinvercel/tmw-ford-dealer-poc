@@ -26,10 +26,14 @@ export default function Welcome({ dealer }: { dealer: DealerConfig }) {
           </div>
 
           <div className={`${styles.panel} reveal`}>
-            <h2 id="welcome-heading" className={`display ${styles.heading}`}>
+            <h2
+              id="welcome-heading"
+              className={`display ${styles.heading}`}
+              data-edit-path="welcome.heading"
+            >
               {welcome.heading}
             </h2>
-            <p>{welcome.body}</p>
+            <p data-edit-path="welcome.body">{welcome.body}</p>
             <a className="arrowLink whiteArrow" href="#contact">
               Find your nearest showroom
             </a>

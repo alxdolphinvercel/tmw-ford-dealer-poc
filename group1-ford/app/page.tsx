@@ -1,4 +1,7 @@
+import { cookies } from "next/headers";
 import { getDealer } from "@/lib/overrides";
+import { verifyEditToken } from "@/lib/edit-token";
+import EditOverlay from "@/components/edit/EditOverlay";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Spotlight from "@/components/Spotlight";
@@ -33,8 +36,18 @@ export default async function Home({
   const dealer = await getDealer(draft);
   const { brand } = dealer;
 
+  /* Inline edit mode: only when the signed edit-session cookie (set by
+     /api/edit from a content-editor handoff link) verifies for THIS dealer.
+     Normal visitors never load the overlay's JS. */
+  const editSession = verifyEditToken(
+    (await cookies()).get("ford_edit")?.value,
+    process.env.EDIT_SIGNING_SECRET ?? ""
+  );
+  const editMode = editSession?.dealerId === dealer.id;
+
   return (
     <div
+      data-edit-brand-root
       style={
         {
           "--accent": brand.accent,
@@ -59,6 +72,14 @@ export default async function Home({
       </main>
 
       <Footer dealer={dealer} />
+
+      {editMode && editSession && (
+        <EditOverlay
+          dealerId={dealer.id}
+          dealerName={brand.name}
+          exp={editSession.exp}
+        />
+      )}
     </div>
   );
 }

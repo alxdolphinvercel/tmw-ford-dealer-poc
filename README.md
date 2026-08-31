@@ -117,6 +117,26 @@ the rollback story.
 | Theming | Accent and dark-band colours (with a colour picker) |
 | National | Ford campaign headings and body copy, on all five sites at once |
 
+### Inline editing on the live sites
+
+The editor can also hand off to the site itself: **Edit live site ↗** opens
+the dealer's production page in an inline edit mode — click a headline and
+type, click a phone number or opening-hours entry for a small format-aware
+popover, pick brand colours from the Theme panel, then **Publish** from the
+bar at the foot of the page. Unpublished edits persist in the browser and are
+restored on the next edit session.
+
+**How it's gated.** The editor (behind Vercel team SSO) mints a short-lived
+HMAC-signed token scoped to one dealer (`/api/edit-link`); the site verifies
+it, keeps it in an httpOnly cookie for the 30-minute session
+(`app/api/edit`), and shows the edit overlay only when the server has
+verified that cookie — normal visitors load zero extra JavaScript. Publishes
+go through a same-origin proxy on the site (`app/api/edit/publish`) that
+forwards server-to-server to the editor's publish API, re-verified there and
+subject to the same allowlist as every other edit path. New environment:
+`EDIT_SIGNING_SECRET` on all six projects, plus `CONTENT_AGENT_ORIGIN` and
+`VERCEL_AUTOMATION_BYPASS_SECRET` on the five sites.
+
 ### Running and configuring it
 
 ```bash

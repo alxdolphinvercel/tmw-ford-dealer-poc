@@ -58,12 +58,16 @@ export default function Header({ dealer }: { dealer: DealerConfig }) {
             <div className="widthHolder">
               <div className={`contentHolder ${styles.alertInner}`}>
                 <p>
-                  {alert.text} <a href={alert.href}>{alert.linkLabel}</a>
+                  <span data-edit-path="alert.text">{alert.text}</span>{" "}
+                  <a href={alert.href} data-edit-path="alert.linkLabel">
+                    {alert.linkLabel}
+                  </a>
                 </p>
                 <button
                   type="button"
                   onClick={() => setAlertClosed(true)}
                   aria-label="Close announcement"
+                  data-edit-disable
                 >
                   Close
                 </button>
@@ -104,6 +108,7 @@ export default function Header({ dealer }: { dealer: DealerConfig }) {
                   <a
                     href={`tel:${location.phone.replace(/\s/g, "")}`}
                     aria-label={`Call us on ${location.phone}`}
+                    data-edit-path="location.phone"
                   >
                     {location.phone}
                   </a>
@@ -198,6 +203,7 @@ export default function Header({ dealer }: { dealer: DealerConfig }) {
                 <a
                   className={styles.overlayPhone}
                   href={`tel:${location.phone.replace(/\s/g, "")}`}
+                  data-edit-mirror="location.phone"
                 >
                   {location.phone}
                 </a>

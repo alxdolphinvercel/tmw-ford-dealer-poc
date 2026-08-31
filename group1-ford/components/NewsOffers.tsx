@@ -19,9 +19,15 @@ export default function NewsOffers({ dealer }: { dealer: DealerConfig }) {
             <span className={styles.avatar} aria-hidden="true">
               {quote.initials}
             </span>
-            <h3 className={styles.quoteName}>{quote.name}</h3>
-            <p className={styles.quoteRole}>{quote.role}</p>
-            <blockquote className={styles.quoteText}>{quote.quote}</blockquote>
+            <h3 className={styles.quoteName} data-edit-path="newsOffers.quote.name">
+              {quote.name}
+            </h3>
+            <p className={styles.quoteRole} data-edit-path="newsOffers.quote.role">
+              {quote.role}
+            </p>
+            <blockquote className={styles.quoteText} data-edit-path="newsOffers.quote.quote">
+              {quote.quote}
+            </blockquote>
           </div>
 
           <div className={`panel panelTint ${styles.promoPanel} reveal`}>
@@ -36,10 +42,20 @@ export default function NewsOffers({ dealer }: { dealer: DealerConfig }) {
               />
             </div>
             <div className="panelBody">
-              <span className="eyebrow">{promo.eyebrow}</span>
-              <h3 className={styles.promoHeading}>{promo.heading}</h3>
-              <p className={styles.promoBody}>{promo.body}</p>
-              <a className="arrowLink whiteArrow" href={promo.href}>
+              <span className="eyebrow" data-edit-path="newsOffers.promo.eyebrow">
+                {promo.eyebrow}
+              </span>
+              <h3 className={styles.promoHeading} data-edit-path="newsOffers.promo.heading">
+                {promo.heading}
+              </h3>
+              <p className={styles.promoBody} data-edit-path="newsOffers.promo.body">
+                {promo.body}
+              </p>
+              <a
+                className="arrowLink whiteArrow"
+                href={promo.href}
+                data-edit-path="newsOffers.promo.linkLabel"
+              >
                 {promo.linkLabel}
               </a>
             </div>

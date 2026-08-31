@@ -38,8 +38,12 @@ export default function Hero({ dealer }: { dealer: DealerConfig }) {
 
       <div className={`widthHolder ${styles.contentWrap}`}>
         <div className={`contentHolder ${styles.content}`}>
-          <h1 className={`display ${styles.headline}`}>{hero.headline}</h1>
-          <p className={styles.strapline}>{hero.strapline}</p>
+          <h1 className={`display ${styles.headline}`} data-edit-path="hero.headline">
+            {hero.headline}
+          </h1>
+          <p className={styles.strapline} data-edit-path="hero.strapline">
+            {hero.strapline}
+          </p>
           <div className={styles.buttons}>
             <a className="btn btnPrimary" href="#locators">
               Explore our range
@@ -75,8 +79,10 @@ export default function Hero({ dealer }: { dealer: DealerConfig }) {
             )}
 
             <ul className={styles.accreditations}>
-              {trust.accreditations.map((a) => (
-                <li key={a}>{a}</li>
+              {trust.accreditations.map((a, i) => (
+                <li key={i} data-edit-path={`trust.accreditations.${i}`}>
+                  {a}
+                </li>
               ))}
             </ul>
           </div>

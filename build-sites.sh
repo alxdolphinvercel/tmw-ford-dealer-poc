@@ -50,6 +50,10 @@ for site in "${SITES[@]}"; do
 node_modules
 .next
 .vercel
+.env.local
+package-lock.json
+AGENTS.md
+CLAUDE.md
 EOF
 
   cat > "$site/vercel.json" <<'EOF'

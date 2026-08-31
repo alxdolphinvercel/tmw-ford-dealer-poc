@@ -1,5 +1,6 @@
 import { getAll } from "@vercel/edge-config";
 import { dealer as baked } from "@/dealer.config";
+import { CAMPAIGN_ORDER } from "./content";
 import type { DealerConfig } from "./types";
 
 /**
@@ -68,7 +69,7 @@ const ALLOWED_PATHS = [
   ),
 ];
 
-function isAllowedPath(path: string): boolean {
+export function isAllowedPath(path: string): boolean {
   const actual = path.split(".");
   return ALLOWED_PATHS.some((pattern) => {
     const segments = pattern.split(".");
@@ -78,16 +79,6 @@ function isAllowedPath(path: string): boolean {
     );
   });
 }
-
-/** Campaign order — must match nationalBanners() in lib/content.ts. */
-const CAMPAIGN_ORDER = [
-  "options",
-  "electricGrant",
-  "powerPromise",
-  "service",
-  "charging",
-  "business",
-];
 
 export async function getDealer(draftParam?: string): Promise<DealerConfig> {
   const config = structuredClone(baked);

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { DealerConfig } from "@/lib/types";
+import { CAMPAIGN_ORDER } from "@/lib/content";
 import styles from "./SplitBanners.module.css";
 
 /**
@@ -12,7 +13,7 @@ export default function SplitBanners({ dealer }: { dealer: DealerConfig }) {
     <div id="offers">
       {dealer.splitBanners.map((banner, i) => (
         <section
-          key={banner.heading}
+          key={i}
           className={`${styles.banner} ${i % 2 === 1 ? styles.alt : ""} ${
             i % 2 === 1 ? "altBg" : ""
           }`}
@@ -34,9 +35,18 @@ export default function SplitBanners({ dealer }: { dealer: DealerConfig }) {
                 {banner.eyebrow && (
                   <span className={styles.eyebrowDark}>{banner.eyebrow}</span>
                 )}
-                <h2 className={`display ${styles.heading}`}>{banner.heading}</h2>
-                {banner.body.map((para) => (
-                  <p key={para.slice(0, 32)}>{para}</p>
+                {/* Campaign copy is national: edits address FORD_CAMPAIGNS
+                    paths so a publish reaches all five sites at once. */}
+                <h2
+                  className={`display ${styles.heading}`}
+                  data-edit-path={`FORD_CAMPAIGNS.${CAMPAIGN_ORDER[i]}.heading`}
+                >
+                  {banner.heading}
+                </h2>
+                {banner.body.map((para, j) => (
+                  <p key={j} data-edit-path={`FORD_CAMPAIGNS.${CAMPAIGN_ORDER[i]}.body.${j}`}>
+                    {para}
+                  </p>
                 ))}
                 <div className={styles.links}>
                   {banner.links.map((link) => (

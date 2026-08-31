@@ -1,5 +1,6 @@
 import { getTarget, isAllowed } from "@/lib/targets";
 import { readItem, writeItems } from "@/lib/store";
+import { verifyEditToken } from "@/lib/edit-token";
 
 /**
  * Publishes edits to Edge Config. Live on all visitors' next request —
@@ -8,6 +9,11 @@ import { readItem, writeItems } from "@/lib/store";
  * Every path is validated against the target's allowlist regardless of where
  * the request came from (form, AI assist, or a hand-crafted POST); one bad
  * path rejects the whole batch.
+ *
+ * Two callers, two gates: the form editor posts same-origin with no
+ * Authorization header and is gated by the team SSO in front of this
+ * deployment; the dealer sites' inline-edit proxies post with a Bearer edit
+ * token (plus the SSO bypass header) and are gated by the HMAC check below.
  */
 
 interface PublishBody {
@@ -21,6 +27,25 @@ export async function POST(request: Request) {
   const target = getTarget(targetId ?? "");
   if (!target) {
     return Response.json({ error: `Unknown target "${targetId}".` }, { status: 400 });
+  }
+
+  const auth = request.headers.get("authorization");
+  if (auth?.startsWith("Bearer ")) {
+    const session = verifyEditToken(auth.slice(7), process.env.EDIT_SIGNING_SECRET ?? "");
+    if (!session) {
+      return Response.json(
+        { error: "Invalid or expired edit session." },
+        { status: 401 }
+      );
+    }
+    /* A dealer token may publish its own item or the shared national copy —
+       the latter is a POC simplification; a scope claim would tighten it. */
+    if (session.dealerId !== target.id && target.id !== "national") {
+      return Response.json(
+        { error: "Edit session is not valid for this target." },
+        { status: 403 }
+      );
+    }
   }
   if (!Array.isArray(edits) || edits.length === 0) {
     return Response.json({ error: "No edits to publish." }, { status: 400 });

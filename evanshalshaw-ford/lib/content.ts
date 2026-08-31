@@ -2,6 +2,20 @@ import { FORD_CAMPAIGNS } from "./ford";
 import type { SplitBanner } from "./types";
 
 /**
+ * The campaign occupying each banner slot, in the order nationalBanners()
+ * builds them. Overrides and the inline editor use it to translate between
+ * national FORD_CAMPAIGNS paths and a dealer's splitBanners indices.
+ */
+export const CAMPAIGN_ORDER: readonly string[] = [
+  "options",
+  "electricGrant",
+  "powerPromise",
+  "service",
+  "charging",
+  "business",
+];
+
+/**
  * Builds the six national campaign banners from the Fixed Ford campaign copy,
  * given the imagery a dealer has chosen for each slot.
  *

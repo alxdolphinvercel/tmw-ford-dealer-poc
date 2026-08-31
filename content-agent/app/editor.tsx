@@ -61,6 +61,7 @@ export default function Editor({ targets }: { targets: EditorTarget[] }) {
 
   const [publishing, setPublishing] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
+  const [editLinkPending, setEditLinkPending] = useState(false);
 
   const target = targets.find((t) => t.id === targetId)!;
   const current = values[targetId];
@@ -190,6 +191,30 @@ export default function Editor({ targets }: { targets: EditorTarget[] }) {
       });
     } finally {
       setPublishing(false);
+    }
+  }
+
+  /* ---- Inline edit handoff -------------------------------------------- */
+
+  async function openEditMode() {
+    setEditLinkPending(true);
+    setStatus(null);
+    try {
+      const res = await fetch("/api/edit-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target: targetId }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? `Request failed (${res.status}).`);
+      window.open(body.url, "_blank", "noopener");
+    } catch (error) {
+      setStatus({
+        ok: false,
+        text: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setEditLinkPending(false);
     }
   }
 
@@ -323,6 +348,16 @@ export default function Editor({ targets }: { targets: EditorTarget[] }) {
             <span className={dirty.length > 0 ? styles.draftBadge : styles.liveBadge}>
               {dirty.length > 0 ? "Draft preview" : "Live site"}
             </span>
+            {target.previewUrl && (
+              <button
+                type="button"
+                className={styles.editLive}
+                onClick={openEditMode}
+                disabled={editLinkPending}
+              >
+                {editLinkPending ? "Opening…" : "Edit live site ↗"}
+              </button>
+            )}
             <a href={iframeSrc} target="_blank" rel="noreferrer">
               Open in new tab ↗
             </a>
