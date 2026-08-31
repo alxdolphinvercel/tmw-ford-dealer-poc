@@ -21,6 +21,26 @@ const DEV_PORTS: Record<string, number> = {
   "hendy-ford": 3015,
 };
 
+const TEAM_SLUG = "tmw-ford-poc";
+
+/** Vercel's branch-URL sanitisation (feat/inline-edit → feat-inline-edit). */
+function branchSlug(ref: string): string {
+  return ref.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Where the edit session should open. Production sites are built from main,
+ * which has no edit mode — so on a preview deployment, hand off to the SAME
+ * branch's preview of the dealer site (<project>-git-<branch>-<team>).
+ */
+function siteOrigin(targetId: string, previewUrl: string): string {
+  const ref = process.env.VERCEL_GIT_COMMIT_REF;
+  if (process.env.VERCEL && ref && ref !== "main") {
+    return `https://${targetId}-poc-git-${branchSlug(ref)}-${TEAM_SLUG}.vercel.app`;
+  }
+  return previewUrl;
+}
+
 export async function POST(request: Request): Promise<Response> {
   const { target: targetId } = await request.json().catch(() => ({}));
 
@@ -45,7 +65,7 @@ export async function POST(request: Request): Promise<Response> {
   const base =
     host.startsWith("localhost") && DEV_PORTS[target.id]
       ? `http://localhost:${DEV_PORTS[target.id]}`
-      : target.previewUrl;
+      : siteOrigin(target.id, target.previewUrl);
 
   const token = signEditToken(target.id, TTL_SECONDS, secret);
   return Response.json({
