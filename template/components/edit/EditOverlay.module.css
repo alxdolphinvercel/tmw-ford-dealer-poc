@@ -39,17 +39,6 @@
   white-space: nowrap;
 }
 
-.timer,
-.timerLow {
-  font-weight: 400;
-  color: #9aa4ad;
-  font-variant-numeric: tabular-nums;
-}
-
-.timerLow {
-  color: #ff8f6b;
-}
-
 .statusOk,
 .statusError {
   flex: 1;

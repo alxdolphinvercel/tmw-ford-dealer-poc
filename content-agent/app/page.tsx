@@ -42,8 +42,9 @@ export default async function Page() {
   if (!process.env.EDGE_CONFIG) {
     return (
       <Notice>
-        The <code>EDGE_CONFIG</code> connection string is not set for this
-        project. Connect the shared Edge Config store, then reload.
+        The editor isn&apos;t set up yet — ask your administrator. (Technical:
+        the <code>EDGE_CONFIG</code> connection string is not set for this
+        project.)
       </Notice>
     );
   }
@@ -89,9 +90,9 @@ export default async function Page() {
   if (missing.length > 0) {
     return (
       <Notice>
-        Edge Config has no content for: <code>{missing.join(", ")}</code>. Seed
-        it from the repo — <code>cd content-agent && npx tsx scripts/seed.ts</code>{" "}
-        — then reload.
+        The editor isn&apos;t set up yet — ask your administrator. (Technical:
+        no content stored for <code>{missing.join(", ")}</code>; run{" "}
+        <code>cd content-agent && npx tsx scripts/seed.ts</code>, then reload.)
       </Notice>
     );
   }

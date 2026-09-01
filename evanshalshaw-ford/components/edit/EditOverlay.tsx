@@ -95,9 +95,6 @@ export default function EditOverlay({
   const [publishing, setPublishing] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [expired, setExpired] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(() =>
-    Math.max(0, exp - Math.floor(Date.now() / 1000))
-  );
 
   /* ---- DOM helpers ------------------------------------------------------ */
 
@@ -225,10 +222,7 @@ export default function EditOverlay({
       }
     } catch {}
     if (restoredCount > 0) {
-      setStatus({
-        ok: true,
-        text: `Restored ${restoredCount} unpublished change${restoredCount === 1 ? "" : "s"} from this browser.`,
-      });
+      setStatus({ ok: true, text: "Welcome back — your unsaved changes are still here." });
     }
 
     /* Event delegation. */
@@ -301,14 +295,12 @@ export default function EditOverlay({
     };
   }, [applyToDom, brandRoot, markDirty, setDraft, storageKey]);
 
-  /* ---- Session countdown ------------------------------------------------ */
+  /* ---- Session expiry (checked quietly — no countdown in the UI) -------- */
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const left = Math.max(0, exp - Math.floor(Date.now() / 1000));
-      setSecondsLeft(left);
-      if (left === 0) setExpired(true);
-    }, 1000);
+      if (exp * 1000 < Date.now()) setExpired(true);
+    }, 5000);
     return () => clearInterval(timer);
   }, [exp]);
 
@@ -362,17 +354,21 @@ export default function EditOverlay({
       if (body?.ok) {
         setStatus({
           ok: true,
-          text: `Published ${body.published} change${body.published === 1 ? "" : "s"} — live on every visitor's next request (allow ~10 s).`,
+          text: `Published — your change${body.published === 1 ? " is" : "s are"} live on the site.`,
         });
       } else {
-        const firstError =
-          results.find((r) => !r.ok)?.error ?? body?.error ?? "Publish failed.";
-        setStatus({ ok: false, text: firstError });
+        const detail = results.find((r) => !r.ok)?.error ?? body?.error;
+        console.error("Publish failed:", detail);
+        setStatus({
+          ok: false,
+          text: "Couldn't publish just now — nothing was lost. Please try again.",
+        });
       }
     } catch (error) {
+      console.error("Publish failed:", error);
       setStatus({
         ok: false,
-        text: error instanceof Error ? error.message : String(error),
+        text: "Couldn't publish just now — nothing was lost. Please try again.",
       });
     } finally {
       setPublishing(false);
@@ -380,7 +376,7 @@ export default function EditOverlay({
   }
 
   function discard() {
-    if (!confirm("Discard all unpublished changes?")) return;
+    if (!confirm("Undo all your changes and put everything back how it was?")) return;
     clearDrafts();
     location.reload();
   }
@@ -389,7 +385,7 @@ export default function EditOverlay({
     if (
       Object.keys(draftsRef.current).length > 0 &&
       !confirm(
-        "You have unpublished changes. They stay saved in this browser, but the public page won't show them. Exit anyway?"
+        "You have changes that aren't published yet. They'll be kept for next time. Finish editing?"
       )
     ) {
       e.preventDefault();
@@ -399,9 +395,6 @@ export default function EditOverlay({
   /* ---- Render ------------------------------------------------------------ */
 
   const dirtyCount = Object.keys(drafts).length;
-  const mins = Math.floor(secondsLeft / 60);
-  const secs = secondsLeft % 60;
-  const lowTime = secondsLeft > 0 && secondsLeft < 300;
 
   return (
     <>
@@ -455,26 +448,21 @@ export default function EditOverlay({
 
       <div className={styles.bar} role="region" aria-label="Inline editor">
         <div className={styles.barLeft}>
-          <span className={styles.badge}>Edit mode</span>
-          <span className={styles.dealer}>
-            {dealerName}
-            <span className={lowTime ? styles.timerLow : styles.timer}>
-              {expired ? " · session expired" : ` · ${mins}:${String(secs).padStart(2, "0")}`}
-            </span>
-          </span>
+          <span className={styles.badge}>Editing</span>
+          <span className={styles.dealer}>{dealerName}</span>
         </div>
 
-        {status && (
-          <p className={status.ok ? styles.statusOk : styles.statusError}>
-            {status.text}
-          </p>
-        )}
-        {expired && dirtyCount > 0 && !status && (
+        {expired ? (
           <p className={styles.statusError}>
-            Edit session expired — your {dirtyCount} change
-            {dirtyCount === 1 ? "" : "s"} stay saved in this browser. Reopen
-            this site from the Content Editor to continue.
+            Your editing session has ended — your changes are safe. Reopen this
+            site from the Content Editor to keep going.
           </p>
+        ) : (
+          status && (
+            <p className={status.ok ? styles.statusOk : styles.statusError}>
+              {status.text}
+            </p>
+          )
         )}
 
         <div className={styles.barRight}>
@@ -487,8 +475,8 @@ export default function EditOverlay({
           </button>
           <span className={styles.count}>
             {dirtyCount === 0
-              ? "No unpublished changes"
-              : `${dirtyCount} unpublished change${dirtyCount === 1 ? "" : "s"}`}
+              ? "Click any outlined text to edit it"
+              : `${dirtyCount} change${dirtyCount === 1 ? "" : "s"} ready to publish`}
           </span>
           <button
             type="button"
@@ -496,7 +484,7 @@ export default function EditOverlay({
             onClick={discard}
             disabled={dirtyCount === 0 || publishing}
           >
-            Discard
+            Undo all
           </button>
           <button
             type="button"
@@ -504,10 +492,10 @@ export default function EditOverlay({
             onClick={publish}
             disabled={dirtyCount === 0 || publishing || expired}
           >
-            {publishing ? "Publishing…" : `Publish${dirtyCount > 0 ? ` ${dirtyCount}` : ""}`}
+            {publishing ? "Publishing…" : "Publish"}
           </button>
           <a className={styles.exit} href={COOKIE_EXIT_URL} onClick={exitEditMode}>
-            Exit
+            Finish
           </a>
         </div>
       </div>

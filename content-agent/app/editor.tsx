@@ -176,7 +176,7 @@ export default function Editor({ targets }: { targets: EditorTarget[] }) {
       setReasons((r) => ({ ...r, [targetId]: {} }));
       setStatus({
         ok: true,
-        text: `Published ${body.published} change${body.published === 1 ? "" : "s"} — live on every visitor's next request (allow ~10 s).`,
+        text: `Published — your change${body.published === 1 ? " is" : "s are"} live on the site.`,
       });
       /* Give Edge Config a moment to propagate, then show the real thing. */
       if (reloadTimer.current) clearTimeout(reloadTimer.current);
@@ -371,9 +371,9 @@ export default function Editor({ targets }: { targets: EditorTarget[] }) {
       </div>
 
       <footer className={styles.footer}>
-        Edits publish to Vercel Edge Config and appear on the live site within
-        seconds — no deployment. Re-seeding from the repository resets all
-        published content to the values in git.
+        Published changes appear on the live site within seconds — no developer
+        needed. Only approved content fields can be changed; page structure and
+        legal text are protected.
       </footer>
     </div>
   );
