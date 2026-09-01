@@ -122,16 +122,20 @@ export default function EditOverlay({
 
   const [popover, setPopover] = useState<Popover | null>(null);
   const [themeOpen, setThemeOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(true);
+  /* Closed = the page browses normally; expanding the control is what arms
+     editing (outlines, click-to-edit, pickers). */
+  const [panelOpen, setPanelOpen] = useState(false);
+  const armedOnceRef = useRef(false);
   const [publishing, setPublishing] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [expired, setExpired] = useState(false);
 
-  /* Mirrors for the document-level handlers (registered once on mount). */
-  const uiRef = useRef<{ popoverPath: string | null; theme: boolean }>({
-    popoverPath: null,
-    theme: false,
-  });
+  /* Mirrors for the document-level handlers (registered once per arm). */
+  const uiRef = useRef<{
+    popoverPath: string | null;
+    theme: boolean;
+    assistIdle: boolean;
+  }>({ popoverPath: null, theme: false, assistIdle: false });
 
   /* AI proposals: previewed on the page, publishable only once accepted. */
   const [proposals, setProposals] = useState<Record<string, Proposal>>({});
@@ -141,8 +145,14 @@ export default function EditOverlay({
   const [refusal, setRefusal] = useState<string | null>(null);
 
   useEffect(() => {
-    uiRef.current = { popoverPath: popover?.path ?? null, theme: themeOpen };
-  }, [popover, themeOpen]);
+    uiRef.current = {
+      popoverPath: popover?.path ?? null,
+      theme: themeOpen,
+      /* An assist panel with no pending suggestions may close on outside
+         click; one holding suggestions needs an explicit choice. */
+      assistIdle: assistOpen && Object.keys(proposals).length === 0,
+    };
+  }, [popover, themeOpen, assistOpen, proposals]);
 
   /* Success messages fade on their own; problems stay until acted on. */
   useEffect(() => {
@@ -249,12 +259,14 @@ export default function EditOverlay({
     } catch {}
   }, [storageKey]);
 
-  /* ---- Mount: arm the page ---------------------------------------------- */
+  /* ---- Arm/disarm the page with the control panel ------------------------ */
 
   useEffect(() => {
+    if (!panelOpen) return;
+
     document.documentElement.classList.add("ford-edit-mode");
 
-    /* Record originals + make free-text hosts editable. */
+    /* Make free-text hosts editable (and on first arm, record originals). */
     document.querySelectorAll<HTMLElement>("[data-edit-path]").forEach((el) => {
       const path = el.getAttribute("data-edit-path")!;
       if (isImagePath(path)) {
@@ -277,44 +289,49 @@ export default function EditOverlay({
         el.spellcheck = false;
       }
     });
-    const root = brandRoot();
-    if (root) {
-      const style = getComputedStyle(root);
-      for (const [path, cssVar] of Object.entries(BRAND_VARS)) {
-        originalsRef.current[path] = style.getPropertyValue(cssVar).trim();
-      }
-    }
 
-    /* Restore drafts from a previous session. */
-    let restoredCount = 0;
-    try {
-      const raw = localStorage.getItem(storageKey);
-      if (raw) {
-        const { savedAt, drafts: stored } = JSON.parse(raw);
-        if (
-          typeof savedAt === "number" &&
-          Date.now() - savedAt < STORAGE_TTL_MS &&
-          stored &&
-          typeof stored === "object"
-        ) {
-          const next: Drafts = {};
-          for (const [path, value] of Object.entries(stored)) {
-            if (typeof value !== "string") continue;
-            if (value === originalsRef.current[path]) continue;
-            next[path] = value;
-            applyToDom(path, value);
-            markDirty(path, true);
-          }
-          draftsRef.current = next;
-          setDrafts(next);
-          restoredCount = Object.keys(next).length;
-        } else {
-          localStorage.removeItem(storageKey);
+    if (!armedOnceRef.current) {
+      armedOnceRef.current = true;
+
+      const root = brandRoot();
+      if (root) {
+        const style = getComputedStyle(root);
+        for (const [path, cssVar] of Object.entries(BRAND_VARS)) {
+          originalsRef.current[path] = style.getPropertyValue(cssVar).trim();
         }
       }
-    } catch {}
-    if (restoredCount > 0) {
-      setStatus({ ok: true, text: "Welcome back — your unsaved changes are still here." });
+
+      /* Restore drafts from a previous session. */
+      let restoredCount = 0;
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (raw) {
+          const { savedAt, drafts: stored } = JSON.parse(raw);
+          if (
+            typeof savedAt === "number" &&
+            Date.now() - savedAt < STORAGE_TTL_MS &&
+            stored &&
+            typeof stored === "object"
+          ) {
+            const next: Drafts = {};
+            for (const [path, value] of Object.entries(stored)) {
+              if (typeof value !== "string") continue;
+              if (value === originalsRef.current[path]) continue;
+              next[path] = value;
+              applyToDom(path, value);
+              markDirty(path, true);
+            }
+            draftsRef.current = next;
+            setDrafts(next);
+            restoredCount = Object.keys(next).length;
+          } else {
+            localStorage.removeItem(storageKey);
+          }
+        }
+      } catch {}
+      if (restoredCount > 0) {
+        setStatus({ ok: true, text: "Welcome back — your unsaved changes are still here." });
+      }
     }
 
     /* Event delegation. */
@@ -328,6 +345,7 @@ export default function EditOverlay({
       const hadPopover = uiRef.current.popoverPath;
       if (hadPopover) setPopover(null);
       if (uiRef.current.theme) setThemeOpen(false);
+      if (uiRef.current.assistIdle) setAssistOpen(false);
 
       if (t.closest("[data-edit-disable]")) {
         e.preventDefault();
@@ -392,26 +410,29 @@ export default function EditOverlay({
       }
     };
 
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (Object.keys(draftsRef.current).length > 0) e.preventDefault();
-    };
-
     document.addEventListener("click", onClick, true);
     document.addEventListener("input", onInput, true);
     document.addEventListener("keydown", onKeyDown, true);
-    window.addEventListener("beforeunload", onBeforeUnload);
 
     return () => {
       document.documentElement.classList.remove("ford-edit-mode");
       document.removeEventListener("click", onClick, true);
       document.removeEventListener("input", onInput, true);
       document.removeEventListener("keydown", onKeyDown, true);
-      window.removeEventListener("beforeunload", onBeforeUnload);
       document.querySelectorAll<HTMLElement>("[data-edit-path]").forEach((el) => {
         el.removeAttribute("contenteditable");
       });
     };
-  }, [applyToDom, brandRoot, markDirty, setDraft, storageKey]);
+  }, [panelOpen, applyToDom, brandRoot, markDirty, setDraft, storageKey]);
+
+  /* Unsaved-work guard lives outside arming — drafts persist while browsing. */
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (Object.keys(draftsRef.current).length > 0) e.preventDefault();
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
 
   /* ---- Session expiry (checked quietly — no countdown in the UI) -------- */
 
@@ -734,10 +755,15 @@ export default function EditOverlay({
               <button
                 type="button"
                 className={styles.collapse}
-                aria-label="Minimise editing controls"
-                onClick={() => setPanelOpen(false)}
+                aria-label="Stop editing and browse the page"
+                onClick={() => {
+                  setPopover(null);
+                  setThemeOpen(false);
+                  if (assistOpen) closeAssist();
+                  setPanelOpen(false);
+                }}
               >
-                —
+                ✕
               </button>
             </div>
 
@@ -794,9 +820,9 @@ export default function EditOverlay({
             type="button"
             className={styles.fab}
             onClick={() => setPanelOpen(true)}
-            aria-label="Open editing controls"
+            aria-label="Start editing this page"
           >
-            ✎ Editing
+            ✎ Edit this page
             {dirtyCount > 0 && <span className={styles.fabBadge}>{dirtyCount}</span>}
           </button>
         )}
@@ -946,7 +972,17 @@ function AssistPanel({
         if (e.key === "Escape") onClose();
       }}
     >
-      <p className={styles.popoverTitle}>Describe a change in plain English</p>
+      <div className={styles.popoverHead}>
+        <p className={styles.popoverTitle}>Describe a change in plain English</p>
+        <button
+          type="button"
+          className={styles.popoverClose}
+          aria-label="Close"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+      </div>
       <textarea
         className={styles.assistInput}
         rows={2}
@@ -956,9 +992,6 @@ function AssistPanel({
         onChange={(e) => setInstruction(e.target.value)}
       />
       <div className={styles.popoverActions}>
-        <button type="button" onClick={onClose}>
-          Done
-        </button>
         <button
           type="button"
           className={styles.apply}
@@ -1051,7 +1084,17 @@ function ThemePopover({
       role="dialog"
       data-ford-ui
     >
-      <p className={styles.popoverTitle}>Dealer palette</p>
+      <div className={styles.popoverHead}>
+        <p className={styles.popoverTitle}>Dealer palette</p>
+        <button
+          type="button"
+          className={styles.popoverClose}
+          aria-label="Close"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+      </div>
       {fields.map(({ path, label }) => {
         const value = currentValue(path);
         return (
@@ -1066,11 +1109,6 @@ function ThemePopover({
           </label>
         );
       })}
-      <div className={styles.popoverActions}>
-        <button type="button" onClick={onClose}>
-          Done
-        </button>
-      </div>
     </div>
   );
 }
