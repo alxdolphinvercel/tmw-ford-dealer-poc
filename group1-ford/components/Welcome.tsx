@@ -14,7 +14,11 @@ export default function Welcome({ dealer }: { dealer: DealerConfig }) {
     <section className={styles.section} aria-labelledby="welcome-heading">
       <div className="widthHolder">
         <div className={styles.grid}>
-          <div className={styles.imageHolder}>
+          <div
+            className={styles.imageHolder}
+            data-edit-path="welcome.image"
+            data-edit-image={welcome.image}
+          >
             <Image
               src={welcome.image}
               alt={welcome.imageAlt}

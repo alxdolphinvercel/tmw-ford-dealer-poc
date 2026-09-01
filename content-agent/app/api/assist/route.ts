@@ -1,19 +1,27 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { getTarget, isAllowed } from "@/lib/targets";
+import { getTarget, isAllowed, entryFor } from "@/lib/targets";
+import { verifyEditToken } from "@/lib/edit-token";
 
 export const maxDuration = 60;
 
 /**
- * AI assist for the editor.
+ * AI assist for both editors.
  *
- * Takes the marketer's plain-English instruction plus the form's current
- * field values (including unsaved ones), and returns proposed values for
- * specific fields. Nothing is published here — proposals land in the form,
- * highlighted, for the marketer to review and publish.
+ * Takes the marketer's plain-English instruction plus the current field
+ * values (including unsaved ones), and returns proposed values for specific
+ * fields. Nothing is published here — proposals are reviewed and published
+ * by the marketer.
  *
- * The model returns field paths and replacement text, never code, and every
- * returned path must be in the allowlist AND among the fields it was shown.
+ * Two callers, two gates (mirroring /api/publish): the form editor posts
+ * same-origin with no Authorization header, gated by the team SSO in front
+ * of this deployment; the dealer sites' inline-edit proxies post with a
+ * Bearer edit token plus the SSO bypass header, gated by the HMAC check.
+ *
+ * A dealer-target request may include national campaign fields (the inline
+ * overlay shows the whole page as one context); returned paths must be in
+ * the dealer OR national allowlist AND among the fields the model was shown.
+ * Publishing still routes each edit to its true target.
  */
 
 const ProposalSchema = z.object({
@@ -37,7 +45,7 @@ const ProposalSchema = z.object({
 interface AssistBody {
   target?: string;
   instruction?: string;
-  fields?: { path: string; label: string; value: string }[];
+  fields?: { path: string; label?: string; value: string }[];
 }
 
 export async function POST(request: Request) {
@@ -47,6 +55,24 @@ export async function POST(request: Request) {
   if (!target) {
     return Response.json({ error: `Unknown target "${targetId}".` }, { status: 400 });
   }
+
+  const auth = request.headers.get("authorization");
+  if (auth?.startsWith("Bearer ")) {
+    const session = verifyEditToken(auth.slice(7), process.env.EDIT_SIGNING_SECRET ?? "");
+    if (!session) {
+      return Response.json(
+        { error: "Invalid or expired edit session." },
+        { status: 401 }
+      );
+    }
+    if (session.dealerId !== target.id && target.id !== "national") {
+      return Response.json(
+        { error: "Edit session is not valid for this target." },
+        { status: 403 }
+      );
+    }
+  }
+
   if (!instruction?.trim()) {
     return Response.json({ error: "No instruction given." }, { status: 400 });
   }
@@ -54,7 +80,22 @@ export async function POST(request: Request) {
     return Response.json({ error: "No fields supplied." }, { status: 400 });
   }
 
-  const known = new Set(fields.map((f) => f.path));
+  /* National campaign fields may ride along with a dealer target. */
+  const national = target.id === "national" ? undefined : getTarget("national");
+  const entryForUnion = (path: string) =>
+    entryFor(target, path) ?? (national ? entryFor(national, path) : undefined);
+
+  /* Labels come from the allowlist, not the caller. */
+  const shown = fields.flatMap((f) => {
+    const entry = entryForUnion(f.path);
+    if (!entry || typeof f.value !== "string") return [];
+    const isNational = !isAllowed(target, f.path);
+    return [{ path: f.path, label: entry.label, value: f.value, isNational }];
+  });
+  if (shown.length === 0) {
+    return Response.json({ error: "No editable fields supplied." }, { status: 400 });
+  }
+  const known = new Set(shown.map((f) => f.path));
 
   const { object: proposal } = await generateObject({
     model: "anthropic/claude-sonnet-4.6",
@@ -62,6 +103,7 @@ export async function POST(request: Request) {
     system: [
       "You edit content for Ford dealer websites.",
       "You may only change the fields listed. You cannot add fields, change page structure, navigation, legal text, or code.",
+      "Fields marked NATIONAL are shared Ford campaign copy on all five dealer sites — only change them when the instruction is clearly about campaign copy, not this one dealer.",
       "Change as few fields as possible. Preserve each field's existing tone, length and punctuation style.",
       "Never invent prices, APR figures, dates or legal terms that the instruction did not supply.",
       "If the instruction cannot be carried out with these fields alone, set refusal and return no edits.",
@@ -70,7 +112,10 @@ export async function POST(request: Request) {
       `Target: ${target.name}`,
       "",
       "Editable fields (path — label — current value):",
-      ...fields.map((f) => `${f.path} — ${f.label} — ${JSON.stringify(f.value)}`),
+      ...shown.map(
+        (f) =>
+          `${f.path} — ${f.label}${f.isNational ? " — NATIONAL: applies to all five dealer sites" : ""} — ${JSON.stringify(f.value)}`
+      ),
       "",
       `Instruction: ${instruction}`,
     ].join("\n"),
@@ -86,7 +131,7 @@ export async function POST(request: Request) {
   }
 
   for (const edit of proposal.edits) {
-    if (!isAllowed(target, edit.path) || !known.has(edit.path)) {
+    if (!entryForUnion(edit.path) || !known.has(edit.path)) {
       return Response.json({
         edits: [],
         refusal: `Refused: "${edit.path}" is not an editable content field. Structure, navigation and legal text are governed centrally.`,
@@ -94,5 +139,11 @@ export async function POST(request: Request) {
     }
   }
 
-  return Response.json({ edits: proposal.edits, refusal: null });
+  return Response.json({
+    edits: proposal.edits.map((edit) => ({
+      ...edit,
+      label: entryForUnion(edit.path)?.label ?? edit.path,
+    })),
+    refusal: null,
+  });
 }

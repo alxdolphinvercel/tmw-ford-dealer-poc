@@ -94,13 +94,21 @@ function locate(source: string, path: string): Located | null {
 
 /** Resolves one path segment against the current node. */
 function step(node: ts.Node, segment: string): ts.Node | undefined {
-  // Unwrap `as const`, parentheses, and satisfies expressions.
-  while (
-    ts.isAsExpression(node) ||
-    ts.isParenthesizedExpression(node) ||
-    ts.isSatisfiesExpression(node)
-  ) {
-    node = node.expression;
+  // Unwrap `as const`, parentheses, satisfies expressions, and single-argument
+  // helper calls — `splitBanners: nationalBanners({ offer: "…" })` lets a path
+  // step into the argument object (used by the seed to read banner imagery).
+  while (true) {
+    if (
+      ts.isAsExpression(node) ||
+      ts.isParenthesizedExpression(node) ||
+      ts.isSatisfiesExpression(node)
+    ) {
+      node = node.expression;
+    } else if (ts.isCallExpression(node) && node.arguments.length === 1) {
+      node = node.arguments[0];
+    } else {
+      break;
+    }
   }
 
   const index = Number(segment);

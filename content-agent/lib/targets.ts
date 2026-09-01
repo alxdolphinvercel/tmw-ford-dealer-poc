@@ -12,7 +12,7 @@
  * baked-in dealer.config.ts at request time (template/lib/overrides.ts).
  */
 
-export type Layer = "Free" | "Flexible" | "Theming" | "National";
+export type Layer = "Free" | "Imagery" | "Flexible" | "Theming" | "National";
 
 export interface EditablePath {
   /** Dotted path, `N` standing in for an array index. */
@@ -39,6 +39,15 @@ export const DEALER_PATHS: EditablePath[] = [
   { path: "welcome.body", layer: "Free", label: "Welcome paragraph" },
   { path: "metaTitle", layer: "Free", label: "Page title (SEO)" },
   { path: "metaDescription", layer: "Free", label: "Meta description (SEO)" },
+
+  { path: "hero.image", layer: "Imagery", label: "Hero image" },
+  { path: "hero.imageAlt", layer: "Imagery", label: "Hero image — alt text" },
+  { path: "newsOffers.promo.image", layer: "Imagery", label: "Promo image" },
+  { path: "newsOffers.promo.imageAlt", layer: "Imagery", label: "Promo image — alt text" },
+  { path: "welcome.image", layer: "Imagery", label: "Welcome image" },
+  { path: "welcome.imageAlt", layer: "Imagery", label: "Welcome image — alt text" },
+  { path: "splitBanners.N.image", layer: "Imagery", label: "Campaign banner image" },
+  { path: "splitBanners.N.imageAlt", layer: "Imagery", label: "Campaign banner image — alt text" },
 
   { path: "location.phone", layer: "Flexible", label: "Main phone number" },
   { path: "location.areasServed", layer: "Flexible", label: "Areas served" },

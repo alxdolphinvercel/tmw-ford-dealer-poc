@@ -1,6 +1,7 @@
 import { getAll } from "@vercel/edge-config";
 import { dealer as baked } from "@/dealer.config";
 import { CAMPAIGN_ORDER } from "./content";
+import { IMAGE_SRCS } from "./image-library";
 import type { DealerConfig } from "./types";
 
 /**
@@ -46,6 +47,15 @@ const ALLOWED_PATHS = [
   "welcome.body",
   "metaTitle",
   "metaDescription",
+  // Imagery — dealer photography, values constrained to the approved library
+  "hero.image",
+  "hero.imageAlt",
+  "newsOffers.promo.image",
+  "newsOffers.promo.imageAlt",
+  "welcome.image",
+  "welcome.imageAlt",
+  "splitBanners.N.image",
+  "splitBanners.N.imageAlt",
   // Flexible — dealer facts
   "location.phone",
   "location.areasServed",
@@ -103,6 +113,9 @@ function applyFlat(config: DealerConfig, flat: unknown): void {
 
   for (const [path, value] of Object.entries(flat as Record<string, unknown>)) {
     if (typeof value !== "string" || !isAllowedPath(path)) continue;
+    /* An <img src> may only ever be an approved-library asset — this also
+       closes the crafted-?draft= vector, not just the store. */
+    if (path.endsWith(".image") && !IMAGE_SRCS.has(value)) continue;
     setPath(config, translate(path), value);
   }
 }

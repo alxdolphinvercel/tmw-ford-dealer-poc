@@ -31,7 +31,11 @@ export default function NewsOffers({ dealer }: { dealer: DealerConfig }) {
           </div>
 
           <div className={`panel panelTint ${styles.promoPanel} reveal`}>
-            <div className="panelImage">
+            <div
+              className="panelImage"
+              data-edit-path="newsOffers.promo.image"
+              data-edit-image={promo.image}
+            >
               <Image
                 src={promo.image}
                 alt={promo.imageAlt}

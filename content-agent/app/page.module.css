@@ -107,6 +107,49 @@
   color: var(--warn);
 }
 
+/* ---- Image library picker ----------------------------------------------- */
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+
+.imageCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.72rem;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.imageCell img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 5px;
+  display: block;
+}
+
+.imageCell:hover {
+  border-color: var(--line);
+}
+
+.imageCellCurrent,
+.imageCellCurrent:hover {
+  border-color: var(--accent, #0374d6);
+}
+
 .editLive {
   margin-left: auto;
   margin-right: 1rem;

@@ -13,7 +13,7 @@ export default function Hero({ dealer }: { dealer: DealerConfig }) {
 
   return (
     <section className={styles.hero} id="top">
-      <div className={styles.media}>
+      <div className={styles.media} data-edit-path="hero.image" data-edit-image={hero.image}>
         <Image
           src={hero.image}
           alt={hero.imageAlt}

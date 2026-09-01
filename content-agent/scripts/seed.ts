@@ -43,13 +43,43 @@ function extract(
   return flat;
 }
 
+/**
+ * Banner imagery hides inside the nationalBanners({...}) call, keyed by
+ * campaign argument rather than slot index, so the generic extractor can't
+ * see it. Map each argument to the built config's splitBanners.<i> slot —
+ * order matches CAMPAIGN_ORDER / nationalBanners() in template/lib/content.ts.
+ */
+const BANNER_ARG_KEYS = [
+  "offer",
+  "grant",
+  "powerPromise",
+  "service",
+  "charging",
+  "business",
+];
+
+function extractBannerImages(file: string): Record<string, string> {
+  const source = readFileSync(resolve(ROOT, file), "utf8");
+  const flat: Record<string, string> = {};
+  BANNER_ARG_KEYS.forEach((key, i) => {
+    const image = readPath(source, `splitBanners.${key}`);
+    const alt = readPath(source, `splitBanners.${key}Alt`);
+    if (image !== null) flat[`splitBanners.${i}.image`] = image;
+    if (alt !== null) flat[`splitBanners.${i}.imageAlt`] = alt;
+  });
+  return flat;
+}
+
 async function main() {
   loadEnvLocal();
 
   const items: ItemWrite[] = [
     ...SITES.map((site) => ({
       key: site.id,
-      value: extract(`configs/${site.id}.ts`, DEALER_PATHS),
+      value: {
+        ...extract(`configs/${site.id}.ts`, DEALER_PATHS),
+        ...extractBannerImages(`configs/${site.id}.ts`),
+      },
     })),
     { key: "national", value: extract("template/lib/ford.ts", NATIONAL_PATHS) },
   ];

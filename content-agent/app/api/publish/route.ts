@@ -1,6 +1,7 @@
-import { getTarget, isAllowed } from "@/lib/targets";
+import { getTarget, isAllowed, entryFor } from "@/lib/targets";
 import { readItem, writeItems } from "@/lib/store";
 import { verifyEditToken } from "@/lib/edit-token";
+import { IMAGE_SRCS } from "@/lib/image-library";
 
 /**
  * Publishes edits to Edge Config. Live on all visitors' next request —
@@ -61,6 +62,18 @@ export async function POST(request: Request) {
         {
           error: `"${edit?.path}" is not an editable content field. Structure, navigation and legal text are governed centrally.`,
         },
+        { status: 403 }
+      );
+    }
+    /* Imagery can only come from the approved library — never a free URL. */
+    const entry = entryFor(target, edit.path);
+    if (
+      entry?.layer === "Imagery" &&
+      edit.path.endsWith(".image") &&
+      !IMAGE_SRCS.has(edit.value)
+    ) {
+      return Response.json(
+        { error: "Images must be chosen from the approved image library." },
         { status: 403 }
       );
     }

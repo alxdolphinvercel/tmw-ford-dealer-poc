@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { EditorField, EditorTarget } from "./page";
+import { IMAGE_LIBRARY } from "@/lib/image-library";
 import styles from "./page.module.css";
 
 /**
@@ -13,12 +14,22 @@ import styles from "./page.module.css";
 
 const LAYER_HEADINGS: Record<string, string> = {
   Free: "Free — dealer editorial",
+  Imagery: "Imagery — dealer photography",
   Flexible: "Flexible — dealer facts",
   Theming: "Theming — dealer palette",
   National: "National — Ford campaign copy (all five sites)",
 };
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
+
+/* Thumbnails come from a public dealer site — every site serves the same
+   approved assets; this app ships none of its own. */
+const IMAGE_ORIGIN =
+  process.env.NEXT_PUBLIC_IMAGE_ORIGIN ?? "https://lookers-ford-poc.vercel.app";
+
+function thumbUrl(src: string): string {
+  return `${IMAGE_ORIGIN}/_next/image?url=${encodeURIComponent(src)}&w=256&q=75`;
+}
 
 function base64url(json: string): string {
   const bytes = new TextEncoder().encode(json);
@@ -121,11 +132,13 @@ export default function Editor({ targets }: { targets: EditorTarget[] }) {
         body: JSON.stringify({
           target: targetId,
           instruction,
-          fields: target.fields.map((f) => ({
-            path: f.path,
-            label: f.label,
-            value: current[f.path],
-          })),
+          fields: target.fields
+            .filter((f) => f.layer !== "Imagery")
+            .map((f) => ({
+              path: f.path,
+              label: f.label,
+              value: current[f.path],
+            })),
         }),
       });
       const body = await res.json();
@@ -311,6 +324,10 @@ export default function Editor({ targets }: { targets: EditorTarget[] }) {
                   savedValue={saved[targetId][field.path]}
                   reason={reasons[targetId]?.[field.path]}
                   onChange={(v) => setField(field.path, v)}
+                  onPickImage={(src, alt) => {
+                    setField(field.path, src);
+                    setField(field.path.replace(/\.image$/, ".imageAlt"), alt);
+                  }}
                   onRevert={() => revert(field.path)}
                 />
               ))}
@@ -385,6 +402,7 @@ function Field({
   savedValue,
   reason,
   onChange,
+  onPickImage,
   onRevert,
 }: {
   field: EditorField;
@@ -392,13 +410,48 @@ function Field({
   savedValue: string;
   reason?: string;
   onChange: (value: string) => void;
+  onPickImage?: (src: string, alt: string) => void;
   onRevert: () => void;
 }) {
   const isDirty = value !== savedValue;
   const isColor = field.layer === "Theming";
+  const isImage = field.layer === "Imagery" && field.path.endsWith(".image");
   const isHours = field.path.includes(".hours.") && field.path.endsWith(".time");
   const long = savedValue.length > 80;
   const id = `field-${field.path.replaceAll(".", "-")}`;
+
+  if (isImage) {
+    return (
+      <div className={`${styles.field} ${reason ? styles.aiProposed : ""}`}>
+        <div className={styles.fieldHead}>
+          <label>{field.label}</label>
+          {isDirty && (
+            <span className={styles.fieldFlags}>
+              <span className={styles.dirtyDot} aria-hidden />
+              <button type="button" className={styles.revert} onClick={onRevert}>
+                Revert
+              </button>
+            </span>
+          )}
+        </div>
+        <div className={styles.imageGrid} role="listbox" aria-label={field.label}>
+          {IMAGE_LIBRARY.map((image) => (
+            <button
+              key={image.src}
+              type="button"
+              role="option"
+              aria-selected={image.src === value}
+              className={`${styles.imageCell} ${image.src === value ? styles.imageCellCurrent : ""}`}
+              onClick={() => onPickImage?.(image.src, image.alt)}
+            >
+              <img src={thumbUrl(image.src)} alt="" loading="lazy" />
+              <span>{image.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`${styles.field} ${reason ? styles.aiProposed : ""}`}>

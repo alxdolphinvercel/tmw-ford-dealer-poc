@@ -20,7 +20,11 @@ export default function SplitBanners({ dealer }: { dealer: DealerConfig }) {
         >
           <div className="widthHolder">
             <div className={`contentHolder ${styles.inner}`}>
-              <div className={`${styles.imageHolder} reveal`}>
+              <div
+                className={`${styles.imageHolder} reveal`}
+                data-edit-path={`splitBanners.${i}.image`}
+                data-edit-image={banner.image}
+              >
                 <Image
                   src={banner.image}
                   alt={banner.imageAlt}
