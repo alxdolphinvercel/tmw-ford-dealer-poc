@@ -122,9 +122,16 @@ export default function EditOverlay({
 
   const [popover, setPopover] = useState<Popover | null>(null);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [expired, setExpired] = useState(false);
+
+  /* Mirrors for the document-level handlers (registered once on mount). */
+  const uiRef = useRef<{ popoverPath: string | null; theme: boolean }>({
+    popoverPath: null,
+    theme: false,
+  });
 
   /* AI proposals: previewed on the page, publishable only once accepted. */
   const [proposals, setProposals] = useState<Record<string, Proposal>>({});
@@ -132,6 +139,17 @@ export default function EditOverlay({
   const [assistOpen, setAssistOpen] = useState(false);
   const [assisting, setAssisting] = useState(false);
   const [refusal, setRefusal] = useState<string | null>(null);
+
+  useEffect(() => {
+    uiRef.current = { popoverPath: popover?.path ?? null, theme: themeOpen };
+  }, [popover, themeOpen]);
+
+  /* Success messages fade on their own; problems stay until acted on. */
+  useEffect(() => {
+    if (!status?.ok) return;
+    const timer = setTimeout(() => setStatus(null), 6000);
+    return () => clearTimeout(timer);
+  }, [status]);
 
   /* ---- DOM helpers ------------------------------------------------------ */
 
@@ -302,6 +320,15 @@ export default function EditOverlay({
     /* Event delegation. */
     const onClick = (e: MouseEvent) => {
       const t = e.target as HTMLElement;
+
+      /* Clicks inside any of our floating UI behave normally. */
+      if (t.closest("[data-ford-ui]")) return;
+
+      /* A click anywhere else dismisses the open popovers. */
+      const hadPopover = uiRef.current.popoverPath;
+      if (hadPopover) setPopover(null);
+      if (uiRef.current.theme) setThemeOpen(false);
+
       if (t.closest("[data-edit-disable]")) {
         e.preventDefault();
         e.stopPropagation();
@@ -310,33 +337,22 @@ export default function EditOverlay({
       const host = t.closest<HTMLElement>("[data-edit-path]");
       if (!host) return;
       const path = host.getAttribute("data-edit-path")!;
-      if (isImagePath(path)) {
+      if (isImagePath(path) || isPopoverPath(path)) {
         e.preventDefault();
         e.stopPropagation();
+        /* Clicking the element that opened the popover closes it instead. */
+        if (hadPopover === path) return;
         const r = host.getBoundingClientRect();
         setPopover({
-          kind: "image",
+          kind: isImagePath(path) ? "image" : "field",
           path,
           rect: { top: r.top, left: r.left, bottom: r.bottom, width: r.width },
           value:
             path in draftsRef.current
               ? draftsRef.current[path]
-              : (host.getAttribute("data-edit-image") ?? ""),
-        });
-        return;
-      }
-      if (isPopoverPath(path)) {
-        e.preventDefault();
-        e.stopPropagation();
-        const r = host.getBoundingClientRect();
-        setPopover({
-          kind: "field",
-          path,
-          rect: { top: r.top, left: r.left, bottom: r.bottom, width: r.width },
-          value:
-            path in draftsRef.current
-              ? draftsRef.current[path]
-              : (host.textContent ?? ""),
+              : isImagePath(path)
+                ? (host.getAttribute("data-edit-image") ?? "")
+                : (host.textContent ?? ""),
         });
         return;
       }
@@ -361,6 +377,11 @@ export default function EditOverlay({
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (uiRef.current.popoverPath) setPopover(null);
+        if (uiRef.current.theme) setThemeOpen(false);
+        return;
+      }
       if (e.key !== "Enter") return;
       const host = (e.target as HTMLElement)?.closest?.<HTMLElement>(
         "[data-edit-path]"
@@ -434,7 +455,12 @@ export default function EditOverlay({
           }
         }
         for (const r of results.filter((r) => r.ok)) {
-          for (const p of r.paths) markDirty(p, false);
+          for (const p of r.paths) {
+            markDirty(p, false);
+            /* Published values are the new baseline — editing back to the
+               page-load text afterwards is a real change, not a no-op. */
+            if (p in draftsRef.current) originalsRef.current[p] = draftsRef.current[p];
+          }
         }
         draftsRef.current = next;
         setDrafts(next);
@@ -600,7 +626,6 @@ export default function EditOverlay({
     <>
       {/* Attribute-selector affordances can't live in a CSS module. */}
       <style>{`
-        html.ford-edit-mode body { padding-bottom: 84px; }
         html.ford-edit-mode [data-edit-path] {
           outline: 1.5px dashed rgba(255, 176, 32, 0.75);
           outline-offset: 3px;
@@ -695,65 +720,86 @@ export default function EditOverlay({
         />
       )}
 
-      <div className={styles.bar} role="region" aria-label="Inline editor">
-        <div className={styles.barLeft}>
-          <span className={styles.badge}>Editing</span>
-          <span className={styles.dealer}>{dealerName}</span>
-        </div>
+      <div
+        className={styles.dock}
+        role="region"
+        aria-label="Inline editor"
+        data-ford-ui
+      >
+        {panelOpen ? (
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <span className={styles.badge}>Editing</span>
+              <span className={styles.dealer}>{dealerName}</span>
+              <button
+                type="button"
+                className={styles.collapse}
+                aria-label="Minimise editing controls"
+                onClick={() => setPanelOpen(false)}
+              >
+                —
+              </button>
+            </div>
 
-        {expired ? (
-          <p className={styles.statusError}>
-            Your editing session has ended — your changes are safe. Reopen this
-            site from the Content Editor to keep going.
-          </p>
+            {expired ? (
+              <p className={styles.statusError}>
+                Your editing session has ended — your changes are safe. Reopen
+                this site from the Content Editor to keep going.
+              </p>
+            ) : status ? (
+              <p className={status.ok ? styles.statusOk : styles.statusError}>
+                {status.text}
+              </p>
+            ) : (
+              <p className={styles.count}>
+                {dirtyCount === 0
+                  ? "Click any outlined text or picture to change it."
+                  : `${dirtyCount} change${dirtyCount === 1 ? "" : "s"} ready to publish.`}
+              </p>
+            )}
+
+            <div className={styles.panelActions}>
+              <button
+                type="button"
+                onClick={() => (assistOpen ? closeAssist() : setAssistOpen(true))}
+              >
+                Suggest changes
+              </button>
+              <button type="button" onClick={() => setThemeOpen((v) => !v)}>
+                Theme
+              </button>
+              <button
+                type="button"
+                onClick={discard}
+                disabled={dirtyCount === 0 || publishing}
+              >
+                Undo all
+              </button>
+              <button
+                type="button"
+                className={styles.publish}
+                onClick={publish}
+                disabled={dirtyCount === 0 || publishing || expired}
+              >
+                {publishing ? "Publishing…" : "Publish"}
+              </button>
+            </div>
+
+            <a className={styles.exit} href={COOKIE_EXIT_URL} onClick={exitEditMode}>
+              Finish editing
+            </a>
+          </div>
         ) : (
-          status && (
-            <p className={status.ok ? styles.statusOk : styles.statusError}>
-              {status.text}
-            </p>
-          )
+          <button
+            type="button"
+            className={styles.fab}
+            onClick={() => setPanelOpen(true)}
+            aria-label="Open editing controls"
+          >
+            ✎ Editing
+            {dirtyCount > 0 && <span className={styles.fabBadge}>{dirtyCount}</span>}
+          </button>
         )}
-
-        <div className={styles.barRight}>
-          <button
-            type="button"
-            className={styles.themeBtn}
-            onClick={() => (assistOpen ? closeAssist() : setAssistOpen(true))}
-          >
-            Suggest changes
-          </button>
-          <button
-            type="button"
-            className={styles.themeBtn}
-            onClick={() => setThemeOpen((v) => !v)}
-          >
-            Theme
-          </button>
-          <span className={styles.count}>
-            {dirtyCount === 0
-              ? "Click any outlined text to edit it"
-              : `${dirtyCount} change${dirtyCount === 1 ? "" : "s"} ready to publish`}
-          </span>
-          <button
-            type="button"
-            className={styles.discard}
-            onClick={discard}
-            disabled={dirtyCount === 0 || publishing}
-          >
-            Undo all
-          </button>
-          <button
-            type="button"
-            className={styles.publish}
-            onClick={publish}
-            disabled={dirtyCount === 0 || publishing || expired}
-          >
-            {publishing ? "Publishing…" : "Publish"}
-          </button>
-          <a className={styles.exit} href={COOKIE_EXIT_URL} onClick={exitEditMode}>
-            Finish
-          </a>
-        </div>
       </div>
     </>
   );
@@ -778,7 +824,7 @@ function FieldPopover({
   const left = Math.min(Math.max(8, popover.rect.left), window.innerWidth - 328);
 
   return (
-    <div className={styles.popover} style={{ top, left }} role="dialog">
+    <div className={styles.popover} style={{ top, left }} role="dialog" data-ford-ui>
       <label className={styles.popoverLabel}>
         {labelFor(popover.path)}
         <input
@@ -814,24 +860,33 @@ function ImagePopover({
   onPick: (image: LibraryImage) => void;
   onCancel: () => void;
 }) {
-  /* Clamp within the viewport; prefer below the element. */
-  const top = Math.min(popover.rect.bottom + 8, window.innerHeight - 440);
+  /* Fit entirely on screen: cap the height, then clamp the top so the
+     footer (with its close button) is always reachable. */
+  const maxHeight = Math.min(Math.round(window.innerHeight * 0.72), 560);
+  const top = Math.max(
+    8,
+    Math.min(popover.rect.bottom + 8, window.innerHeight - maxHeight - 8)
+  );
   const left = Math.min(Math.max(8, popover.rect.left), window.innerWidth - 428);
 
   return (
     <div
       className={`${styles.popover} ${styles.imagePopover}`}
-      style={{ top: Math.max(8, top), left }}
+      style={{ top, left, maxHeight }}
       role="dialog"
-      onKeyDown={(e) => {
-        if (e.key === "Escape") onCancel();
-      }}
+      data-ford-ui
     >
-      <p className={styles.popoverTitle}>{labelFor(popover.path)}</p>
-      <p className={styles.popoverHint}>
-        Pick from the approved Ford image library — the description for screen
-        readers updates with it.
-      </p>
+      <div className={styles.popoverHead}>
+        <p className={styles.popoverTitle}>{labelFor(popover.path)}</p>
+        <button
+          type="button"
+          className={styles.popoverClose}
+          aria-label="Close"
+          onClick={onCancel}
+        >
+          ✕
+        </button>
+      </div>
       <div className={styles.imageGrid} role="listbox" aria-label="Approved images">
         {IMAGE_LIBRARY.map((image) => (
           <button
@@ -849,11 +904,10 @@ function ImagePopover({
           </button>
         ))}
       </div>
-      <div className={styles.popoverActions}>
-        <button type="button" onClick={onCancel}>
-          Cancel
-        </button>
-      </div>
+      <p className={styles.popoverHint}>
+        Approved Ford images only — the screen-reader description updates with
+        your pick.
+      </p>
     </div>
   );
 }
@@ -887,6 +941,7 @@ function AssistPanel({
       className={`${styles.popover} ${styles.assistPanel}`}
       role="dialog"
       aria-label="Suggest changes"
+      data-ford-ui
       onKeyDown={(e) => {
         if (e.key === "Escape") onClose();
       }}
@@ -991,7 +1046,11 @@ function ThemePopover({
   ];
 
   return (
-    <div className={`${styles.popover} ${styles.themePopover}`} role="dialog">
+    <div
+      className={`${styles.popover} ${styles.themePopover}`}
+      role="dialog"
+      data-ford-ui
+    >
       <p className={styles.popoverTitle}>Dealer palette</p>
       {fields.map(({ path, label }) => {
         const value = currentValue(path);
