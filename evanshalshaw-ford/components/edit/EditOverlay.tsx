@@ -628,6 +628,11 @@ export default function EditOverlay({
           opacity: 0.35;
           cursor: not-allowed;
         }
+        /* The hero's content layer sits over its image; let clicks fall
+           through its empty regions so the image is reachable, while the
+           text and CTAs stay interactive. (#top is the hero section.) */
+        html.ford-edit-mode #top > .widthHolder { pointer-events: none; }
+        html.ford-edit-mode #top > .widthHolder .contentHolder > * { pointer-events: auto; }
         html.ford-edit-mode [data-edit-image]::after {
           content: "Change image";
           position: absolute;
